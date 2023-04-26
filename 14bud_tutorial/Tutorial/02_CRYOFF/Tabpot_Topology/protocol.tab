@@ -1,0 +1,4 @@
+#######parameter file############################
+#                          grid                         #prefix
+tab.nonbond           5.0,0.0005,ln1-20                 scale=C6,type=atomtype,prefix=BUU
+

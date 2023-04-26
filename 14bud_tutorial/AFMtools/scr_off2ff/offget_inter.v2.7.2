@@ -1,0 +1,94 @@
+#!/usr/bin/perl
+#offget_interpot .off  EXP POW,ln1,ln3-10 STRC,ln1
+#03/16/2020: format the output. charge product: f13.10, others: f12.3.
+
+$bnk="    ";
+ 
+$filename=$ARGV[0];shift; 
+open (FIL,$filename) || die "can not open file $filename"."\n";
+
+while(<FIL>)
+{
+if (/Inter-Potential/) {
+  while(<FIL>) {
+    if (/Min/) {
+      chomp; 
+      $_ =~ s/^\s+|\s+$//g; 
+      $_ =~ s/\~|:/ /g;
+    # print $_."\n";
+      chomp; push @pot, "$_"; } 
+      if ($_ =~ /\*/) { die "\nThe fitted parameters contain asterisk(*), please check the .off file!\n\n"; } 
+ } } }
+$numpot=@pot;
+
+for ($j=0;$j<$numpot;$j++){
+  $str=$pot[$j];
+  @param=split /\s+/,$str;
+  #seperate string and number, eg. STRC1234.5678 and format output
+  $ipot[0]=sprintf("%-5s",$param[0]);$ipot[1]=sprintf("%-5s",$param[1]);$type=substr($param[2],0,3);
+  $numparam=2;
+  for ($i=2;$i<@param-4;$i++) {
+    if ($param[$i] =~ /[a-zA-Z]/ and $param[$i] =~ /[0-9]/ ) {
+      $param[$i] =~ /[^A-Z]/;
+      $type=$`;
+      $val=substr $param[$i],length($type);
+      $ipot[$numparam]=$type;$numparam++;
+      $ipot[$numparam]=sprintf("%12.3f",$val);
+      $ipot[$numparam]=sprintf("%13.10f",$val) if uc($type) eq "COU";
+      $numparam++;
+    } else {
+      $ipot[$numparam]=sprintf("%12.3f",$param[$i]);
+      $ipot[$numparam]=sprintf("%13.10f",$param[$i]) if uc($type) eq "COU";
+      $ipot[$numparam]=$param[$i] if $param[$i]=~ /[a-zA-Z]/;
+      $numparam++;}
+  }
+  for ($i=@param-4;$i<@param;$i++) {
+    if ($param[$i] =~ /[a-zA-Z]/ and $param[$i] =~ /[0-9]/ ) {
+      $param[$i] =~ /[^A-Z]/;
+      $type=$`;
+      $val=substr $param[$i],length($type);
+      $ipot[$numparam]=$type;$numparam++;
+      $ipot[$numparam]=sprintf("%12.6f",$val);$numparam++;
+    } else {
+      $ipot[$numparam]=sprintf("%12.6f",$param[$i]);
+      $ipot[$numparam]=$param[$i] if $param[$i]=~ /[a-zA-Z]/;
+      $numparam++;}
+  }
+
+  $potential=$ipot[0];
+  for ($k=1;$k<$numparam;$k++) { $potential=$potential."  ".$ipot[$k];}
+  $pot[$j]=$potential;
+  #print $pot[$j]."\n";
+}
+#print @pot."\n";
+
+# finished reading in all the parameters 
+
+for ($iarg=0;$iarg<@ARGV;$iarg++)
+{
+#   print $ARGV[$iarg]."\n";
+   @getpot=split(',',$ARGV[$iarg]);
+   $key=uc($getpot[0]); #off is always uppercase
+   $idx=0;
+   for ($j=0;$j<$numpot;$j++){
+     chomp($pot[$j]);
+     @param=split /\s+/,$pot[$j];
+     #match line number
+     if ($param[2] eq $key){
+       $idx++;
+       for($k=1;$k<@getpot;$k++){
+         $range[$k] = substr $getpot[$k],2; #remove the "ln"  prefix
+           @temp=split('-',$range[$k]);
+           $temp[1]=$temp[0] unless $temp[1] > $temp[0]; #this trigger if "ln" does not have a range
+           if ( $idx >= $temp[0] and $idx <= $temp[1] ){ 
+             $buf=$buf.$pot[$j]."\n";
+           }          
+      } # end of for loop over index or range $k loop
+
+      if ( @getpot == 1) {
+             $buf=$buf.$pot[$j]."\n";
+      } # no index or range are provided, print all the potentials in this type
+    } #end of if (eq $key)
+  }
+}
+print $buf;

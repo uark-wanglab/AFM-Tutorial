@@ -1,0 +1,45 @@
+#!/usr/bin/perl
+
+$keyword=$ARGV[0]; shift;
+$linno=$ARGV[0]; shift; 
+$colm=$ARGV[0]; shift; $value=$ARGV[0]; shift;
+
+$bnk="   ";
+
+while(<>)
+{
+if( /\[\s*$keyword\s*\]/i ) { print;
+$ind=index($_,"]"); $_=substr($_,$ind+1); ($nrec)=split;
+
+for ($i=0; $i<$nrec;$i++)
+{
+$_=<>;
+$_ =~ s/^\s+//;
+@input=split(/\s+/,$_);
+
+  die "Line $linno does not exist in [$keyword]\n" if ($linno > $nrec);
+  if ($i == $linno-1) {
+
+  # do the replacemnt considering _ at position $pus
+  $field=$input[$colm-1];
+  $pus=index($field,_);
+  if ($pus<0) {$input[$colm-1]=$value} else {
+  $input[$colm-1]=$value.substr($field,$pus);}
+  
+  #recreate the line
+  $buf="  ".$input[0];
+  for($j=1;$j<@input;$j++)
+  {  $buf=$buf.$bnk.$input[$j]; }
+  print $buf."\n";
+  }
+  #end of if name match 
+else {print "  ".$_;}
+#end of for loop $i
+}
+#end of keyword match
+}
+
+else {print;}
+}
+
+

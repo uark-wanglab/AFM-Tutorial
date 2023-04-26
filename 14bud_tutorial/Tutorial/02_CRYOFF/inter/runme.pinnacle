@@ -1,0 +1,27 @@
+#!/bin/bash
+#SBATCH -J WFM
+#SBATCH --partition=condo
+#SBATCH --constraint=fwang
+#SBATCH --constraint=0gpu&192gb&nvme
+#SBATCH --qos=condo
+#SBATCH --nodes=1
+#SBATCH --tasks-per-node=32
+#SBATCH --exclusive
+
+module purge
+module load intel/18.0.2 impi/18.0.2 mkl/18.0.2
+
+scrdir=/local_scratch/$SLURM_JOB_ID
+cd $SLURM_SUBMIT_DIR
+cp -a * $scrdir
+cd $scrdir
+
+NP=$SLURM_NPROCS
+
+mpirun -np 32 ~/AFM_Tutorial/Complete_Tutorial/CRYOFF/cry.300.x inter.ff total.ref 2> error.txt 1> stdout
+
+cd $scrdir
+
+cp -a * $SLURM_SUBMIT_DIR
+
+cd $scrdir && rm -r *

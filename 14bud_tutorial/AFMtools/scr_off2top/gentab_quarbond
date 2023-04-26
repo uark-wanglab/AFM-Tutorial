@@ -1,0 +1,15 @@
+#!/usr/bin/perl
+#energy unit:kj/mol, force unit:kj/(mol nm)
+$re=$ARGV[0];shift;$k2=$ARGV[0];shift;$k3=$ARGV[0];shift;$k4=$ARGV[0];
+
+$re=$re*0.1;$k2=$k2*4.184*100;$k3=$k3*4.184*1000;$k4=$k4*4.184*10000;
+$rcut=0.3;$delr=0.0001;$nbins=int(($rcut)/$delr);  
+
+for($i=0;$i<=$nbins;$i++)
+{
+    $r=$delr*$i;
+    $ub=$k2/2.0*($r-$re)**2+$k3/3.0*($r-$re)**3+$k4/4.0*($r-$re)**4;
+    $fb=-$k2*($r-$re)-$k3*($r-$re)**2-$k4*($r-$re)**3;
+    
+    printf("%20.8e %20.8e %20.8e \n", $r,$ub,$fb);
+}

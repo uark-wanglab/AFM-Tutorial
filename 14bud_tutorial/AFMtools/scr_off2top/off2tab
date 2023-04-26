@@ -1,0 +1,44 @@
+#!/usr/bin/perl
+#generate tabulated potential based on protocol, .off and .top file.
+if( $ARGV[0] eq '-h' || $ARGV[0] eq '-help')
+{
+help();
+exit;
+}
+sub help {
+  print "\nGenerate the tabulated potentials based on the off and top files.\n";
+  print "Please refer to the manual about the format of the protocol file.
+Examples can  be found in the protocol directory.\n";
+  print "Usage: off2tab  protocol  off top  \n\n";
+}
+
+
+
+$protfile=$ARGV[0];$inputoff=$ARGV[1];$inptop = $ARGV[2];
+die "$inptop file not found.\n" unless ( -e $inptop);
+die "delete tab_list file before starting" if ( -e "tab_list");
+
+open(PRO,$protfile);
+while(<PRO>)
+{
+if ( $_ =~ /^\s*$|#/) {next;}
+print "\nProtocol: ";print;
+($what)=split;
+
+#nonbonded tabulated potentials in parameter files
+if ($what =~ /tab.nonbond/i) {
+  ($what,$toppam,$pattern)=split;
+  print "Generate tabulated potentials for parameter file $inptop :\n";
+  print "off2top_nonbonded_gentab $toppam  $pattern  $inputoff $inptop\n";
+  system("off2top_nonbonded_gentab $toppam  $pattern  $inputoff $inptop")}
+
+elsif ($what =~ /tab.bond/i) {
+  ($what,$offpam,$toppam,$pattern)=split;
+  print "Generate tabulated potentials for parameter file $inptop :\n";
+  system("off2top_bonded_tab  $offpam  $toppam  $pattern  $inputoff $inptop")}
+
+else { 
+  die  "No rules for this type: $what.\n";
+}
+
+} #end while

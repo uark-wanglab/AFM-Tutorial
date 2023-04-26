@@ -1,0 +1,42 @@
+#!/usr/bin/perl
+#pxyz line1: number of atoms
+#pxyz line2: box, only supports cubic
+
+if( $ARGV[0] eq '-h' || $ARGV[0] eq '-help')
+{
+help();
+exit;
+}
+sub help { print "\nUsage: gro2pxyz [file.gro]\n\n";
+}
+
+$bnk="   ";
+$conv=10.0;
+
+$comment=<>;
+$_=<>;chomp;$natm=$_;
+
+for ($i=0;$i<$natm;$i++)
+{
+$_=<>;
+@fields=split;
+if (@fields ==5 or @fields ==8 ){
+($mol[$i],$namind,$xxx[$i],$yyy[$i],$zzz[$i])=split;
+$nam[$i]=substr($namind,0,-5);
+}
+else{
+($mol[$i],$nam[$i],$ind,$xxx[$i],$yyy[$i],$zzz[$i])=split;
+}
+}
+
+$_=<>;
+($box1,$box2,$box3)=split;
+
+print $natm."\n";
+print $box1*$conv.$bnk.$box2*$conv.$bnk.$box3*$conv."\n";
+
+for ($i=0;$i<$natm;$i++)
+{
+print $nam[$i].$bnk.$xxx[$i]*$conv.$bnk.$yyy[$i]*$conv.$bnk.$zzz[$i]*$conv.$bnk.$mol[$i].$bnk."-9\n";
+}
+

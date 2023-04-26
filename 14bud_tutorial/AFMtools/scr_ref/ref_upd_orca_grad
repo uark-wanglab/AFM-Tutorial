@@ -1,0 +1,51 @@
+#!/usr/bin/perl
+if( $ARGV[0] eq '-h' || $ARGV[0] eq '-help')
+{
+help();
+exit;
+}
+sub help {
+  print "\nAdd the ORCA gradients to a ref file.\n";
+  print "Usage: ref_upd_orca_grad  MyMol.engrad [file.ref] \n\n";
+}
+
+$conv=-627.5095/0.5291772083;
+$bnk="     ";
+
+open(engrad,"$ARGV[0]") || die "can not open $ARGV[0]\n";shift;
+#take tempref file as <>;
+
+do ($_=<engrad>) until ($.>2);  # skip the header
+$natms=<engrad>; chomp($natms);
+do ($_=<engrad>) until ($.>10); #skip the header
+
+$i=0;
+while(<engrad>){
+chomp;
+$gxx[$i]=$_;
+$_=<engrad>; chomp; $gyy[$i]=$_;
+$_=<engrad>; chomp; $gzz[$i]=$_;
+$i++;
+last if $natms==$i;
+}
+
+$_=<>;print;
+$_=<>;print;
+$i=0;
+while(<>)
+{
+($nam,$xxx,$yyy,$zzz, $frx, $fry, $frz, $solv, $molnam)=split;
+unless (($nam eq "NetF") | ($nam eq "Torq")){
+
+print $nam.$bnk.$xxx.$bnk.$yyy.$bnk.$zzz.$bnk;
+print $frx+$gxx[$i]*$conv,$bnk,$fry+$gyy[$i]*$conv,$bnk, $frz+$gzz[$i]*$conv,$bnk;
+print $bnk.$solv.$bnk.$molind.$molnam."\n";
+
+$i++;
+}
+else { print;}
+
+}
+
+
+

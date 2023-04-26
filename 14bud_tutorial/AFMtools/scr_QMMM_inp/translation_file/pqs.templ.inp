@@ -1,0 +1,27 @@
+%MEM=9GB
+TITLE Zwitteronic Alanine 4-mer with mm charges
+GEOM=pqs  FILE=poly6.xyz SYMM=0 NOCM NOORI
+BASIS DUMMY NEXT
+FOR       C@        BASIS=3-21G
+FOR       N@        BASIS=3-21G
+FOR       O@        BASIS=3-21G
+FOR       H@        BASIS=3-21G
+FOR       O&        BASIS=3-21G
+FOR       H&        BASIS=3-21G
+FOR       O         BASIS=3-21G
+FOR       H         BASIS=3-21G
+GUESS=AM1
+SCF DFT=PBE ITER=6 pntq
+BASIS NEXT 
+FOR       C@        BASIS=aug-cc-pVDZ
+FOR       N@        BASIS=aug-cc-pVDZ
+FOR       O@        BASIS=aug-cc-pVDZ
+FOR       H@        BASIS=cc-pVDZ
+FOR       O&        BASIS=aug-cc-pVDZ
+FOR       H&        BASIS=cc-pVDZ
+FOR       O         BASIS=aug-cc-pVDZ
+FOR       H         BASIS=cc-pVDZ
+INTE THRE=12,9 
+SCF DFT=PBE DISP THRE=6 GRID=2 PWAVE PWGD=3.6,2.7 RANG=7,6 SEMI pntq
+FORCE 
+

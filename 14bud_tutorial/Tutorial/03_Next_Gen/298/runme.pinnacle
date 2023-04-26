@@ -1,0 +1,31 @@
+#!/bin/bash
+#SBATCH -J BUUfm
+#SBATCH --partition=condo
+#SBATCH --constraint=fwang
+#SBATCH --constraint=0gpu&192gb&nvme
+#SBATCH --qos=condo
+#SBATCH --nodes=1
+#SBATCH --tasks-per-node=32
+#SBATCH --time=4-00:00:00
+#SBATCH --mail-type=ALL
+#SBATCH --exclusive
+
+
+module purge
+module load intel/18.0.2 mkl/18.0.2 impi/18.0.2 python/3.8-anaconda
+source /home/yingyuan/software/gromacs/2019.6/impi/bin/GMXRC
+
+
+scrdir=/local_scratch/$SLURM_JOB_ID
+cd $SLURM_SUBMIT_DIR
+cp -a * $scrdir
+cd $scrdir
+
+export NP=$SLURM_NPROCS
+
+bash runme.sh
+
+cp -a * $SLURM_SUBMIT_DIR
+
+
+cd $scrdir && rm -r *

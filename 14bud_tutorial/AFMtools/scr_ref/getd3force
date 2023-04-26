@@ -1,0 +1,25 @@
+#!/usr/bin/perl
+#$dftd3bin="/storage/zhma/razor-scratch/zhma/PROJECT3/PQS_newSettings/templates/fit_D3_functionGroup/dftd3";
+#$dftd3bin="/scr/zhma/pqs_new/templates/fit_D3_functionGroup/dftd3";
+if( $ARGV[0] eq '-h' || $ARGV[0] eq '-help')
+{
+help();
+exit;
+}
+sub help {
+  print "\nPerform Grimme's D3 dispersion calculation and get the d3 gradients.\n";
+  print "Usage: getd3force  func  file.xyz \n\n";
+}
+
+$dftd3bin="dftd3";
+$func=$ARGV[0];shift;
+
+$_=`head -1 $ARGV[0]`;
+($num,$emp) = split;
+die "are you using standard xyz file rather than pqs xyz file.\n" if $emp;
+
+$outputname="$ARGV[0].eng";
+$gradientfile="$ARGV[0].grad";
+system("$dftd3bin $ARGV[0] -func $func -bj -grad > $outputname"); 
+system("mv dftd3_gradient $ARGV[0].d3grad");
+

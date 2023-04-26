@@ -1,0 +1,45 @@
+#!/usr/bin/perl
+use List::Util qw[min max];
+$action=$ARGV[0];shift;  #enable or disable term (rm/enable/add)
+$potential=$ARGV[0];shift; #e.g. POW,O,H,-610,-6
+$ff=$ARGV[0];
+@pot=split(/,/,$potential); #get the input potential 
+$keyword=uc($pot[0]),$nam1=uc($pot[1]);$nam2=uc($pot[2]);
+$bnk="    ";
+
+while(<>)
+{
+if( /\[\s*$keyword\s*\]/i ) {
+  $ind=index($_,"]"); $_=substr($_,$ind+1); ($nrec)=split;$nrecbk=$nrec;
+  if ( lc($action) eq "add") {
+    $nrec++;
+    $buf="  ".$pot[1];
+    for ($i=2;$i<@pot;$i++) { $buf=$buf.$bnk.$pot[$i]; }
+    $buf=$buf."\n";
+  } else {
+    while(<>) {
+       chomp;
+       if ($_ =~ / fit| fix/i ) {
+       $_ =~ s/^\s+|\s+$//g;
+       $ind1=rindex($_,"#"); $ind2=rindex($_,";"); $ind3=rindex($_,"!");
+       $ind=max($ind1,$ind2,$ind3);
+       $str = substr $_,$ind+1;
+       $str =~ s/^\s+|\s+$//g;
+       ($name1,$name2)=split /\s+/,$str;
+       if (uc($name1) eq $nam1 and uc($name2) eq $nam2 or (uc($name1) eq $nam1 and uc($name2) eq $nam2))
+       {
+          if ( $action eq "rm") {$buf=$buf."  ".";$str"."\n"; $nrec-- if $ind == -1; $update=1;}
+          elsif ( $action eq "enable") {$buf=$buf."  ".$str."\n"; $nrec++ if $ind != -1; $update=1;} 
+          else {die "No rule for $action.";}      
+       } else {
+         $buf=$buf."  ".$_."\n";
+       }
+      } else { $buf=$buf.$_."\n";last; } 
+    } # end of add/rm by name
+    warn  "No change to $ff since no potential is found for $nam1~$nam2 in $keyword" unless $update == 1; 
+  } 
+  print "[ ".$keyword." ]".$bnk.$nrec."\n";
+  print $buf;
+} # end of keyword match
+else { print;}
+}

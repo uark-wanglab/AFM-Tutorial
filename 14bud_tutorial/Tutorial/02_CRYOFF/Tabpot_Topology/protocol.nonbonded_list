@@ -1,0 +1,4 @@
+#######parameter file############################
+#                     excluded atoms           toppam                            #extra pattern  lis
+list.nonbond     HW~M,HW~OW,HMM,MMM    nonbond_params,1,0.0,1.0                   no
+

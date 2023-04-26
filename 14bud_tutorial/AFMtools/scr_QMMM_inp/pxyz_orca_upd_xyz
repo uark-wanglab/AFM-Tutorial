@@ -1,0 +1,50 @@
+#!/usr/bin/perl
+# This routine update the *xyz session for orca. 
+$bnk="  "; 
+if( $ARGV[0] eq '-h' || $ARGV[0] eq '-help')
+{
+help();
+exit;
+}
+sub help {
+    print "\n Update the section of the ORCA input file from a pxyz or xyz file.\n";
+    print "Please find an example nam_translation file in the manual or translation_file directory.\n";
+    print "Usage: pxyz_orca_upd_xyz MyMol.templ.in nam_translation [file.pxyz] \n\n";
+}
+
+$templ=$ARGV[0]; shift; # This is the template file
+$namtrans=$ARGV[0];shift; # This is the nam translation file
+
+die "ERROR: NameTranslation file: $namtrans expected!\n" unless -e $namtrans;
+die "ERROR: Template file: $templ expected!\n" unless -e $templ;
+
+open (naminfo,"<", $namtrans); # open nameinfo
+### Save nameinfo, create "function" to translate name in pxyz to desired name in ORCA input file
+while (<naminfo>){
+chomp;
+if ((substr $_, 0, 1) eq "#") {next;}
+($nam, $QMnam)=split;
+$trans{$nam} = $QMnam;
+}
+$shlwarn=0;
+
+open (orca, "<", $templ); # Open ORCA template file
+do {$_=<orca>; print;} until (/\*\s*xyz/); # * is keyword for beginnin of xyz portion of MyMol.inp file
+while(<>)
+{
+   chomp;$natms=$_; 
+   $_=<>;
+   for($i=0;$i<$natms;$i++){ 
+     $_=<>; chomp; ($nam,$xxx,$yyy,$zzz,$mol,$mar)=split;
+     if ( $trans{$nam} ){
+     $tmpname=$trans{$nam} }
+     else {$tmpname = $nam;$shlwarn=1};
+     print $bnk,$tmpname,$bnk,$xxx,$bnk,$yyy,$bnk,$zzz,$bnk,"#",$i+1 , "\n";
+   }
+   last;
+}
+
+do  {$_=<orca>; } until (/\s*Q/ || /\s*\*/);
+print;
+while(<orca>){print;}
+print STDERR "Warning: At least one atom name is not in the NameTranslation file.\n" if ($shlwarn);

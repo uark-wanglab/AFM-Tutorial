@@ -1,0 +1,22 @@
+[ defaults ]
+; nbfunc        comb-rule       gen-pairs       fudgeLJ fudgeQQ
+;1               1               no               0.0     0.0
+[ atomtypes ]
+; name      at.num  mass     charge ptype  C6      C12
+C1             6   12.010000    0.0     A 0.0 0.0
+C2             6   12.010000    0.0     A 0.0 0.0
+O1             8   15.999400    0.0     A 0.0 0.0
+H1             1    1.008000    0.0     A 0.0 0.0
+H2             1    1.008000    0.0     A 0.0 0.0
+H3             1    1.008000    0.0     A 0.0 0.0
+OW             8   15.999400    0.0     A 0.0 0.0
+HW             1    1.008000    0.0     A 0.0 0.0
+MW             1    0.000000    0.0     D 0.0 0.0
+[ nonbond_params ]
+;i           j         func     C6         C12
+OW      OW           1      0.002554658       1.0
+HW      MW           1      0.000      1.000
+MW      OW           1      0.000      0.000
+HW      OW           1      0.000      0.000
+MW      MW           1      0.000      0.000
+HW      HW           1      0.000      0.000

@@ -1,0 +1,35 @@
+#!/usr/bin/perl
+$type=$ARGV[0];shift;$pam=$ARGV[0];shift;$rcut=$ARGV[0];shift;$delr=$ARGV[0];shift;$disp=$ARGV[0];shift;
+
+@param=split(/,/,$pam);
+die "Two parameters are needed, but @param were passed into the script!" if $type eq "EXP" and @param !=2;
+die "Three parameters are needed, but @param were passed into the script!" if $type eq "BUCK" and @param !=3;
+
+$A=$param[0];$B=$param[1];
+$scal=1;
+$scal=$disp if $disp != 0;
+$nbins=int($rcut/$delr)+1;  
+
+for($i=0;$i<=$nbins;$i++)
+{
+    $r=$delr*$i;
+    
+    
+    $B=$param[2] if uc($type) eq "BUCK";
+    $h=$A*exp(-$B*$r);
+    $hprime=$A*$B*exp(-$B*$r);
+    if ($i<=10)  {$h=0.0;$hprime=0.0;}
+
+    #POW dispersion (in ordery to used CRYOFF parameter directly, dispersion is C6/r^6 not -C6/r^6)
+    if (uc($type) eq "BUCK"){
+        $C6=$param[1];
+        if ($i<=10)  {$g=0.0;$gprime=0.0;}
+    #    if ($r==0.0) {$g=0.0;$gprime=0.0;}
+        else {
+            $g=$C6*$r**(-6);
+            $gprime=-(-6)*$C6*$r**(-7);
+        }
+    }
+
+    printf("%20.8e %20.8e %20.8e %20.8e %20.8e %20.8e %20.8e\n", $r,0.0,0.0,$g*$scal,$gprime*$scal,$h,$hprime);
+}

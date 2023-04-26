@@ -1,0 +1,34 @@
+#!/usr/bin/perl
+#This routine combine atom name and mark to make the same atom kind have different names if they have different mark value.
+#This also make it easier to view in VMD.
+#
+if( $ARGV[0] eq '-h' || $ARGV[0] eq '-help')
+{
+help();
+exit;
+}
+sub help { print "\nUsage: pxyz_vxyz  [file.pxyz] \n\n";
+}
+
+
+$bnk="   ";
+$_=<>;chomp;$natm=$_;
+
+$_=<>;
+($box1,$box2,$box3)=split;
+
+for ($i=0;$i<$natm;$i++)
+{
+$_=<>;
+($nam[$i],$xxx[$i],$yyy[$i],$zzz[$i],$mol[$i],$val[$i])=split;
+}
+
+print $natm."\n";
+print $box1.$bnk.$box2.$bnk.$box3."\n";
+
+for ($i=0;$i<$natm;$i++)
+{
+#print $nam[$i].$bnk.$xxx[$i]*$conv.$bnk.$yyy[$i]*$conv.$bnk.$zzz[$i]*$conv.$bnk.$mol[$i].$bnk."-9\n";
+printf ("%4s%-2s %15.5f %15.5f %15.5f%8s\n", $nam[$i],$val[$i],$xxx[$i],$yyy[$i],$zzz[$i],$mol[$i])
+}
+

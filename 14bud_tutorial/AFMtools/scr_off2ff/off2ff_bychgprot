@@ -1,0 +1,67 @@
+#!/usr/bin/perl
+$condition=$ARGV[0];shift;$action=$ARGV[0];shift;
+$chgpam=$ARGV[0];shift;$ffpam=$ARGV[0];shift;
+$inputoff=$ARGV[0];shift;$inpff=$ARGV[0];shift;$outff=$ARGV[0];shift;
+$tmpfile = "/tmp/tempoff2ff.$$"; $tmpfil2 = "/tmp/tempoff2f2.$$";
+system ("cp $inpff $tmpfile");
+die "script will not overwrite existing output\n" if (-e $outff);
+
+if ( $chgpam =~ /file/i ){
+  @off=split /=/,$chgpam; $file=$off[1];
+  open(CHGFILE,"<",$file);
+  while(<CHGFILE>) {
+    ($nam,$charge)=split; $chg{$nam}=$charge;
+    $n++; } #get atom charges from a file
+  print "Get [ ".$n." ] atom charges from [ ".$file." ] file.\n";
+} else {
+  @total=`offget_charge $chgpam  $inputoff`;
+  for ($j=0;$j<@total;$j++)
+  {
+    $str=$total[$j];chomp($str); $str =~ s/^\s+|\s+$//g;
+    @temp=split /\s+/,$str;
+    $nam=$temp[0];$chg{$nam}=$temp[4];
+  }
+} #end get atom charges from off file
+
+#condition for charge product
+@cond=split(',',$condition);
+$keyword=$cond[0];
+$operator=$cond[1];
+$val0=$cond[2];
+
+# parameter position in ff file
+@ff=split(',',$ffpam); 
+$keywordff=$ff[0];
+$idx=0;
+if ( @ff == 1) {
+  die "Please provide the line number of charge product in .ff file!\n";
+} else {
+  for ($n=1;$n<@ff;$n++) {
+    $ff[$n]= substr $ff[$n],2; @templn=split(/-/,$ff[$n]);
+    $templn[1]=$templn[0] unless $templn[1] > $templn[0];
+    for ($j=$templn[0];$j<=$templn[1];$j++){ $ln[$idx]=$j; $idx++; } }
+} # line number are provided.
+
+$nterm=$idx;$idx=0;
+print "atm1  atm2    chg_atm1    chg_atm2    chg_product\n";
+for ($i=0;$i<$nterm;$i++){
+  $pamln=$ln[$i];
+  $temp=`ffgetpam  $keywordff $pamln 1 $inpff`;chomp($temp);$nam1=uc($temp) ;#first atom name
+  $temp=`ffgetpam  $keywordff $pamln 2 $inpff`;chomp($temp);$nam2=uc($temp) ; #second atom name
+  $chgprod=$chg{$nam1}*$chg{$nam2};
+  $rm=0;
+  $rm=1 if ( $operator eq "gt" and  $chgprod > $val0);
+  $rm=1 if ( $operator eq "lt" and  $chgprod < $val0);
+  $rm=1 if ( $operator eq "ge" and  $chgprod >= $val0);
+  $rm=1 if ( $operator eq "le" and  $chgprod <= $val0);
+  if ($rm) { 
+    $potential=$keywordff.",".$nam1.",".$nam2;
+    print "$nam1    $nam2    $chg{$nam1}    $chg{$nam2}    $chgprod.\n";
+    system("ffaddremtermbynam  $action  $potential  $tmpfile > $tmpfil2; mv $tmpfil2 $tmpfile");
+    $idx++;
+  }
+}
+
+print "$action [ $idx ] terms from [ $keywordff ].\n";
+system ("mv $tmpfile $outff");
+

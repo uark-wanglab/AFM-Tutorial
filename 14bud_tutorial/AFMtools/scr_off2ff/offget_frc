@@ -1,0 +1,40 @@
+#!/usr/bin/perl
+$off=$ARGV[0];shift;
+$which=$ARGV[0];shift;
+$inter=$ARGV[0];shift;
+$which="fit" unless defined($which);
+
+open (REF,$off);
+while(<REF>)
+{
+if (/RefIdx/) {
+$ind=1;
+
+while ($ind >0 ){
+
+  $_=<REF>;chomp;
+  @nrec=split;
+  $ind=substr($nrec[1],0,1);
+ # print $_."\n";
+  $prt=1;
+  if ( defined($inter) ){ $prt=0 unless $nrec[1] =~ /$inter/i; }
+  $fx=$nrec[@nrec-4] if $which =~ /ref/i;
+  $fx=$nrec[@nrec-3] if $which =~ /fit/i;
+  $fx=$nrec[@nrec-2] if $which =~ /dif/i;
+  for ($i=0;$i<2;$i++) {
+    $_=<REF>;chomp;
+    @nrec=split;
+    $f[$i]=$nrec[@nrec-4] if $which =~ /ref/i;
+    $f[$i]=$nrec[@nrec-3] if $which =~ /fit/i;
+    $f[$i]=$nrec[@nrec-2] if $which =~ /dif/i;
+  }
+
+#  print $prt."\n";
+  print $fx."  ".$f[0]."   ".$f[1]."\n" if $ind >0 and $prt==1;
+#  $_=<REF>;
+}
+
+}
+}
+
+

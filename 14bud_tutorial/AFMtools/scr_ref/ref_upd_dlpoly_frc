@@ -1,0 +1,51 @@
+#!/usr/bin/perl
+if( $ARGV[0] eq '-h' || $ARGV[0] eq '-help')
+{
+help();
+exit;
+}
+sub help {
+  print "\nAdd the DLPOLY forces to the ref file.\n";
+  print "Usage: ref_upd_dlpoly_frc  REVCON  [file.ref] \n\n";
+}
+
+
+$conv=1.0/418.4;
+$bnk="     ";
+
+open(revcon,"$ARGV[0]") || die "can not open $ARGV[0]\n";shift;
+#take tempref file as <>;
+
+$_=<revcon>;$_=<revcon>;chomp;($levcfg,$imcon)=split;
+if ($imcon > 0) {$_=<revcon>;$_=<revcon>;$_=<revcon>;} #read pbc 
+die "need forces\n" unless ($levcfg == 2);
+
+$i=0;
+while(<revcon>){
+ 
+  $_=<revcon>;$_=<revcon>;
+  $_=<revcon>;chomp;($fxx[$i],$fyy[$i],$fzz[$i])=split;
+#  print STDERR $i.$bnk.$fxx[$i]*$conv."\n";
+  $i++;
+}
+
+$_=<>;print;
+$_=<>;print;
+$i=0;
+while(<>)
+{
+($nam,$xxx,$yyy,$zzz, $frx, $fry, $frz, $solv, $molnam)=split;
+unless (($nam eq "NetF") | ($nam eq "Torq")){
+
+print $nam.$bnk.$xxx.$bnk.$yyy.$bnk.$zzz.$bnk;
+printf "%12.7f$bnk%12.7f$bnk%12.7f",$frx+$fxx[$i]*$conv,$fry+$fyy[$i]*$conv,$frz+$fzz[$i]*$conv;
+print $bnk.$solv.$bnk.$molind.$molnam."\n";
+
+$i++;
+}
+else { print;}
+
+}
+
+
+

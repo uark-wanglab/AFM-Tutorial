@@ -1,0 +1,30 @@
+#!/usr/bin/perl
+if( $ARGV[0] eq '-h' || $ARGV[0] eq '-help')
+{
+help();
+exit;
+}
+sub help {
+    print "\nFix the number of atoms for a  xyz or pxyz file.\n";
+    print "Usage: ref_fix_linenu  [file.xyz] \n\n";
+}
+
+
+$_=<>;
+
+$i=0;
+
+$_=<>;
+$buf=$_;
+
+while(<>)
+{
+
+$i++;
+$buf.=$_;
+
+}
+
+print $i."\n";
+print $buf;
+

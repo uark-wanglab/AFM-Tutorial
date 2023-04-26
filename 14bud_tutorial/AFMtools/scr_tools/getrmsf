@@ -1,0 +1,33 @@
+#!/usr/bin/perl
+$_=<>;
+chomp;
+@fields=split;
+die "a minimum of 3 column expected.\n" if (@fields<3);
+$xin=1;
+$xin=@fields-3 if @fields < 5;
+$xin=4 if @fields > 6;
+
+$yin=$xin+1; $zin=$xin+2;
+
+$sfx=$fields[$xin]; $sfy=$fields[$yin]; $sfz=$fields[$zin];
+$sqfx=$fields[$xin]*$fields[$xin]; 
+$sqfy=$fields[$yin]*$fields[$yin]; 
+$sqfz=$fields[$zin]*$fields[$zin];
+$nda=1;
+
+print "force values for the first record: $sfx, $sfy, $sfz\n";
+
+while(<>)
+{
+@fields=split;
+$sfx+=$fields[$xin]; $sfy+=$fields[$yin]; $sfz+=$fields[$zin];
+$sqfx+=$fields[$xin]*$fields[$xin]; 
+$sqfy+=$fields[$yin]*$fields[$yin]; 
+$sqfz+=$fields[$zin]*$fields[$zin];
+$nda++;
+}
+
+$avef=($sfx+$sfy+$sfz)/$nda;
+$rmsf=sqrt(($sqfx+$sqfy+$sqfz)/$nda-$avef*$avef);
+print "RMSF: $rmsf\n";
+

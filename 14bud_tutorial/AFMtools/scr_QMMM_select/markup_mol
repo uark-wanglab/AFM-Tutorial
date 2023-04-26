@@ -1,0 +1,78 @@
+#!/usr/bin/perl
+#This routine mark up molecules from $valm to $val if there are no molecules within rcu  has a mark smaller than $valm.
+
+if( $ARGV[0] eq '-h' || $ARGV[0] eq '-help')
+{
+help();
+exit;
+}
+sub help {
+  print "\nMark up some molecules whose mark equals to mark_old. \n";
+  print "The molecules will be marked up if all the atoms within 'rcut' have a mark not smaller than mark_old.\n";
+  print "These molecules will be marked as mark_new.\n";
+  print "Usage: markup_mol rcut mark_old mark_new [file.pxyz]\n\n";
+}
+
+
+$rcu=$ARGV[0];shift; $cut2=$rcu*$rcu;
+#This is the cut off
+$valm=$ARGV[0];shift; 
+#This is the value to be marked up 
+$val=$ARGV[0];shift;
+#This is the value to be marked up to
+
+$bnk="    ";
+$natm=<>;chomp($natm);
+$_=<>;@pbc=split; $comment=$_;
+($box1,$box2,$box3)=split;
+die "only orthorhombic box supported.\n" if @pbc>3;
+
+for ($i=0;$i<$natm;$i++)
+{
+$_=<>;
+($nam[$i],$xxx[$i],$yyy[$i],$zzz[$i],$mol[$i],$mar[$i])=split;
+}
+
+for ($i=0;$i<$natm;$i++)
+{
+  $markmol[$i]=0;
+  if ($mar[$i] == $valm) { 
+  
+  $markmol[$i]=1;
+  $xo=$xxx[$i];$yo=$yyy[$i];$zo=$zzz[$i];
+
+  for ($j=0; $j<$natm;$j++) {
+
+    if ($mar[$j] < $valm) {
+    
+      $dx=abs($xxx[$j]-$xo); $dx=$box1-$dx if $dx>$box1/2;
+      $dy=abs($yyy[$j]-$yo); $dy=$box2-$dy if $dy>$box2/2;
+      $dz=abs($zzz[$j]-$zo); $dz=$box3-$dz if $dz>$box3/2;
+      $dis2=$dx*$dx+$dy*$dy+$dz*$dz;
+
+      if ($dis2 < $cut2){$markmol[$i]=0;$j=$natm+1}
+    } # end if $mar[$j]
+} } }
+
+# now let start marking 
+$sum_markmol=1; $faom=0;
+$molname=$mol[$faom];
+
+for ($i=0;$i<$natm;$i++)
+{
+if ($molname eq $mol[$i]){
+$sum_markmol*=$markmol[$i];} 
+else {
+  if ($sum_markmol > 0) {
+  for ($k=$faom;$k<$i;$k++){ $mar[$k]=$val;}}
+  $sum_markmol=$markmol[$i];  $faom=$i; $molname=$mol[$faom];}
+}
+
+#output starts here
+print $natm."\n";
+print $comment;
+for ($i=0;$i<$natm;$i++)
+{
+print $nam[$i].$bnk.$xxx[$i].$bnk.$yyy[$i].$bnk.$zzz[$i].$bnk.$mol[$i].$bnk.$mar[$i]."\n";
+}
+

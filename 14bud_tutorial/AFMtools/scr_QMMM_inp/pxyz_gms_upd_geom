@@ -1,0 +1,42 @@
+#!/usr/bin/perl
+# update the QM region specification in a template GAMESS file
+# the MM partial charges are handled in a different script
+
+$templ=$ARGV[0];shift;  #This is GAMESS file,take pxyz from <>
+$znucinfo=$ARGV[0];shift; #This is nuclear charge information
+$bnk='    ';
+
+die "ERROR: GAMESS template file: $templ expected!\n" unless -e $templ;
+die "ERROR: Nuclear charge file: $znucinfo expected!\n" unless -e $znucinfo;
+
+open (znuc,"<", $znucinfo);
+while (<znuc>){
+chomp;
+if ((substr $_, 0, 1) eq "#") {next;}
+($name,$Zval,$QMnam)=split;
+$nuc{$name} = $Zval;
+$trans{$name} = $name;
+$trans{$name} = $QMnam if $QMnam ;
+ }
+
+open (gms,"<", $templ);   
+
+while (<gms>) {
+  unless (/\$DATA/) {print ;}
+  else {
+   print $_;
+   $_=<gms>; print; #molname 
+   $_=<gms>; print; #symmetry
+   $_=<>;chomp;$natms=$_;
+   $_=<>;$pbc=$_;
+ 
+   for($i=0;$i<$natms;$i++){
+     $_=<>; chomp; ($nam, $xxx, $yyy, $zzz,$mol,$mar)=split;
+     die "ERROR: No atomic number found for $nam, Please check $znucinfo file!" unless exists($nuc{$nam});
+     print $trans{$nam}.$mar.$bnk.$nuc{$nam}.$bnk.$xxx.$bnk.$yyy.$bnk.$zzz."\n";
+   } 
+   do {$_=<gms>} until ( $_ =~ /END/);
+   print $_;
+   }  #end of else
+} 
+

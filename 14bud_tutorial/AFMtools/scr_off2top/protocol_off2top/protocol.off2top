@@ -1,0 +1,44 @@
+
+######molecule definition#####################
+#------update molecule charges ----------------
+#                       chgpam/offpam                                                                   toppam                   unitcov    extra pattern
+mol.charge  COU,atm1,0.6645,ln8,ln12,ln16,ln20,ln24,ln28,ln32,ln36,ln40,ln44,ln48,ln52,ln56,ln60         ALA7,col7,ln1-73            1          default
+mol.charge  file=filename                                                                                ALA7,col7,ln1-73            1          type=atmtype
+
+#-----updat bonds, angles, dihedras and  definition (if have) parameters ---------------------
+#                 offpam                   toppam                             unitcov               #extra pattern
+mol.Bond         ALA7,col4              Ala7,bonds,col4,ln1-90                  4.184               default
+mol.Angle        ALA7,col4              Ala7,angles,col4,ln1-70                 1.0                 type=molinfo
+
+mol.Dih          ALA7,col4              Ala7,dihedrals,col7,ln1-50              1.0                 default
+mol.Dih          ALA7,col4              Ala7,dihedrals,col7,ln1-50              1.0                 extra:col5=col8
+mol.Dih          ALA7,col4              Ala7,dihedrals,col7,ln1-50              1.0                 type=molinfo,extra:col5=col8    
+
+mol.define       ALA7,col4              Ala7,atoms,col4,ln1                     1.0                  default
+
+
+#######parameter file (recommended) ############################
+#                       chgpam/offpam                                                                   toppam                   unitcov    extra pattern
+pam.charge  COU,atm1,0.6645,ln8,ln12,ln16,ln20,ln24,ln28,ln32,ln36,ln40,ln44,ln48,ln52,ln56,ln60         ALA7,col7,ln1-73            1          default
+pam.charge  file,chgfile                                                                                 ALA7,col7,ln1-73            1          type=atmtype
+
+pam.nonbond     STRC,col3               nonbond_params,col4,ln1-90              4.184                    default
+pam.nonbond     STRC,col3,ln1-10        nonbond_params,col4,ln61-70               1.0                  type=atmtype
+
+#                offpam                     toppam                            unitcov               #extra pattern
+pam.bond        ALA7,col4               bondtypes,col4,ln1-50                    1.0                    default
+pam.angle       ALA7,col4               angletypes,col4,ln1-50                   1.0                type=atmtype
+
+pam.dih         ALA7,col4               dihedraltypes,col7,ln1-8,ln10            1.0                    default
+pam.dih         ALA7,col4               dihedraltypes,col7,ln1-8,ln10            1.0                extra:col5=col8
+pam.dih         ALA7,col4               dihedraltypes,col7,ln1-8,ln10            1.0                type=atmtype,extra:col5=col8
+
+#----- generate the bonded and nonboned interaction list --------------
+#                     excluded atoms           toppam                            #extra pattern                                 
+list.nonbond       HW~MW,HW~OW,HMM,MMM    nonbond_params,1,1.0,1.0                default       
+list.nonbond       HW~MW,HW~OW,HMM,MMM    nonbond_params                       type=atmtype
+list.nonbond       HW:MW,HW:OW,HMM,MMM    nonbond_params[,1,1.0,1.0]           type=atmtype
+list.bonded        ALA7                   bondtypes,1                          type=atmtype,intkey=har
+list.bonded        ALA7                   angletypes,1                         type=atmtype
+list.bonded        ALA7                   dihedraltypes,9                      no
+#

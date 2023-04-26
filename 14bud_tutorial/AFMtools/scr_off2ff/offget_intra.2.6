@@ -1,0 +1,38 @@
+#!/usr/bin/perl
+#offget_interpot .off  EXP POW,ln1,ln3-10 STRC,ln1
+$bnk="    ";
+ 
+$filename=$ARGV[0];shift; 
+open (FIL,$filename) || die "can not open file $filename"."\n";
+
+while(<FIL>)
+{
+if (/Intra-Defination/) {
+  $npot=0;
+  while(<FIL>) {
+    if (/Table-Potential/) { last; } 
+    else {
+      chomp; $tmp=$_;
+      push @pot, "$tmp";
+      $npot++;
+    } 
+  }
+}
+}
+$buf="";
+for ($i=0;$i<@ARGV;$i++)
+{
+  $getmol=$ARGV[$i];
+  for ($j=0;$j<$npot;$j++){
+    $str=$pot[$j];
+    if ($str =~ /$getmol/i) {
+      print $str."\n";
+      for ($k=$j+1;$k<$npot;$k++) {
+        $str=$pot[$k];
+        if ($str =~ /define/) {
+          print $str."\n";
+        } else { $j=$k;last;}
+      } 
+    }
+  }
+}

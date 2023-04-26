@@ -1,0 +1,3 @@
+copy COU,col4,ln1-31        COU,col4,ln1-31
+copy EXP                    EXPinter,fix
+charge  COU,atm1,0.66450,ln8,ln12,ln16,ln20,ln24,ln28             COU,col4,ln32-49

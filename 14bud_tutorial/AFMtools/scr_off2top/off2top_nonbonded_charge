@@ -1,0 +1,56 @@
+#!/usr/bin/perl
+$offpam=$ARGV[0];$toppam=$ARGV[1];$unitcov=$ARGV[2];$pattern=$ARGV[3];
+$inputoff=$ARGV[4];$inptop = $ARGV[5]; $outtop = $ARGV[6];
+$tmpfile = "/tmp/temptop.$$"; $tmpfil2 = "/tmp/temptop2.$$";
+system ("cp $inptop $tmpfile");
+die "script will not overwrite existing output\n" if (-e $outtop);
+
+#get charges
+@off=split(/,|=/,$offpam);
+$key=$off[0];
+if (uc($key) eq "FILE") {
+  $file=$off[1]; 
+  open(CHGFILE,"<",$file);
+  while(<CHGFILE>){ ($nam,$charge)=split;$chg{$nam}=$charge;$n++;} #get atom charges from a file 
+  print "Get [".$n."] atom charges from [ ".$file." ] file.\n";
+} else {
+  @total=`offget_charge $offpam $inputoff`;
+  for ($j=0;$j<@total;$j++)  {
+    $str=$total[$j];chomp($str); $str =~ s/^\s+|\s+$//g; @temp=split /\s+/,$str;
+    $nam=$temp[0];$chg{$nam}=$temp[4];}
+} #end get atom charges from off file
+
+#transfer atoms types between charge file and top file
+print "Atom types are defined from [ $inputoff ] file.\n" if lc($pattern) eq "no";
+if ($pattern =~ /type/i) {
+  $ind1=index($pattern,"type");
+  $typecov=1;
+  $pat1=substr $pattern,$ind1; $pat1 =~ s/,|=/ /g; @file=split /\s+/,$pat1;
+  open (PATF,$file[1]);
+  while(<PATF>) { chomp; ($typ1,$typ2)=split; $typ{$typ1}=$typ2; }
+  print "Atom types are defined from [ $file[1] ] file.\n";
+} # read atom type from a file
+
+# parameter position in top file
+@top=split(',',$toppam);
+$section=$top[0];
+$pamcol=substr $top[1],3; 
+$idx=0;
+for ($n=2;$n<@top;$n++) {
+  $top[$n]= substr $top[$n],2; @templn=split(/-/,$top[$n]);
+  $templn[1]=$templn[0] unless $templn[1] > $templn[0];
+  for ($j=$templn[0];$j<=$templn[1];$j++){ $ln[$idx]=$j; $idx++;"\n";}
+}
+
+#update top file.
+$nterm=$idx;$idx=0;
+for ($i=0;$i<$nterm;$i++){
+  $pamln=$ln[$i];
+  $temp=`topget_param_paramfile  $section $pamln 1  $inptop`;chomp($temp);$nam=uc($temp); $nam=uc($typ{$nam}) if $typecov==1; 
+  $pam=$chg{$nam}*$unitcov;
+  print "$nam    $pam \n";
+  system("topupd_paramfile  $section $pamln $pamcol $pam  $tmpfile > $tmpfil2; mv $tmpfil2 $tmpfile");
+  $idx++;
+}
+print "Update [ $idx  ] charges for  [ $section ].\n";
+system ("mv $tmpfile $outtop");

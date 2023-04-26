@@ -1,0 +1,27 @@
+#!/usr/bin/perl
+# This routine mark within molecules of a range of atom  [$ido $ide].
+#
+if( $ARGV[0] eq '-h' || $ARGV[0] eq '-help')
+{
+help();
+exit;
+}
+sub help {
+  print "\nMark up molecules within ‘rcut’ of a range of atoms. The mark value is mark_val.\n";
+  print "The input pxyz file will be changed\n";
+  print "Usage: mark_within_range  atom_id_start atom_id_end  rcut mark_val file.pxyz.\n\n";
+}
+
+$ido=$ARGV[0];shift; #This is the first atom id of the seleted molecule
+$ide=$ARGV[0];shift; #Last atom id of the selected molecule
+$rcu=$ARGV[0];shift; #cutoff
+$val=$ARGV[0];shift; #mark value
+$filename=$ARGV[0];
+
+for ($i=$ido;$i<$ide+1;$i++)
+{
+die "test\n" unless @ARGV > 0;
+$cmd="mark_within $i $rcu $val $filename > $filename._$$; mv $filename._$$ $filename";
+print $cmd."\n";
+system("$cmd");
+}

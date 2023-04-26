@@ -1,0 +1,32 @@
+#!/usr/bin/perl
+
+if( $ARGV[0] eq '-h' || $ARGV[0] eq '-help')
+{
+help();
+exit;
+}
+sub help {
+  print "\nPerform Gromacs calculation and get the Gromacs forces.\n";
+  print "Usage: get_gmx_frc  file.gro  templatedir\n\n";
+}
+
+$updtopexe="top_upd_mol_nu";
+$mdrunoptions="-nt 1";
+
+die "usage: getgmxforce grofile templatedir\n" unless (@ARGV == 2); 
+
+#$tempdir="/dev/shm/gromacsrun.$$";
+$groname=$ARGV[0];
+$templatedir=$ARGV[1];
+
+$basename = substr $groname,0,-4;
+
+system("cd $templatedir;rm *.gro *.ndx *.tpr *.log *.trr *.xtc *.edr mdout.mdp");
+system("cp $groname $templatedir");
+system("$updtopexe $groname $templatedir/template.top > $templatedir/template_updated.top");
+system("cd $templatedir; gmx_d make_ndx -f $groname < input_ndx");
+system("cd $templatedir; gmx_d grompp -f mdrun.mdp -c $groname -n index.ndx -p template_updated.top");
+#system("cd $templatedir; mdrun_d -s topol.tpr $mdrunoptions");
+system("cd $templatedir; mdrun_mpi  -s topol.tpr -table table -tableb table  $mdrunoptions");
+system("cd $templatedir;".'gmx_d dump -f traj.trr|grep "f\[" > gmxforce.out');
+system("mv $templatedir/md.log $basename.log; mv $templatedir/gmxforce.out $basename.gmxfrc");

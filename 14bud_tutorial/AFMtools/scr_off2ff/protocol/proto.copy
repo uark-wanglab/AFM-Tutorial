@@ -1,0 +1,19 @@
+
+#copy parameters from .off to .ff
+copy      COU,col4           COU,col4                 #copy all the paramters from .off COU, column 4 to .ff COU column 4
+copy      COU,col4,ln1-63    COU,col4,ln1-63          #copy line 1-63 of .off COU, column 4 to line 1-63  .ff COU, column4.
+copy      COU,col4,ln1-30    COU,col4,ln31-60         #line number can be different (column can also be different)
+
+#populate one section from .off to .ff
+populate  EXP                EXP,fix                  #off and ff have the same name, fix potential. 
+populate  EXP                EXP,fit                  #off and ff have the same name, fit potential.
+populate  EXP                EXPinter,fix             #off and ff can have different name, also applys to copy and charge action.
+populate  EXP,ln1-10         EXPinter,fix             #only populate line 1 to 10.
+
+#update the charge product in "COU" section
+charge  neutral                                                                                    COU,col4,ln1-10    # set the charge product to zero
+charge  file=chg                                                                                   COU,col4,ln1-10    #read the charges from a file
+charge  COU,atm1,0.66450,ln8,ln12,ln16,ln20,ln24,ln28,ln32,ln36,ln40,ln44,ln48,ln52,ln56,ln60      COU,col4,ln64-156  #calculate the charges from .off
+charge  COU,atm2,0.66450,ln8,ln12,ln16,ln20,ln24,ln28,ln32,ln36,ln40,ln44,ln48,ln52,ln56,ln60      COU,col4,ln64-156  
+charge  COU,atm1,sqrtp,ln8,ln12,ln16,ln20,ln24,ln28,ln32,ln36,ln40,ln44,ln48,ln52,ln56,ln60        COU,col4,ln64-156
+charge  COU,atm1,sqrtn,ln8,ln12,ln16,ln20,ln24,ln28,ln32,ln36,ln40,ln44,ln48,ln52,ln56,ln60        COU,col4,ln64-156

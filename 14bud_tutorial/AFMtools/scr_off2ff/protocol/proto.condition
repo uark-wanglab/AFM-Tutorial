@@ -1,0 +1,18 @@
+#                                    offpam                        ffpam
+condition   dist,gt,3.0    rm        EXP,ln1-19              EXP  # gt,ge,lt,le are supported, rm/enable are supported   
+condition   dist,gt,3.0    rm        POW,ln1-19              EXP  #different section name
+condition   dist,gt,3.0    rm        POW                     POW  #line numbers are not mandatory
+condition   dist,gt,3.0    rm        POW                     SRD  #different section name
+#
+condition   val,gt,3.0     rm        EXP,col4,ln1-47         EXP # gt,ge,lt,le are supported, rm/enable are supported
+condition   val,gt,3.5     rm        EXP,col4,ln48-93        POW #different section name
+condition   val,gt,3.5     rm        EXP,col4                EXP #line numbers are not mandatory
+condition   val,gt,3.5     rm        EXP,col4                SRD #different section name
+#
+condition   max            rm        EXP,col4,ln1-47         EXP #max,min are supported, rm/enable are supported         
+condition   max            rm        EXP,col4,ln48-93        POW #different section name
+condition   max            rm        EXP,col4                EXP #line numbers are not mandatory
+condition   max            rm        EXP,col4                SRD #different section name
+#
+condition   chg,gt,0.25   rm  COU,atm1,0.66450,ln8,ln12,ln16,ln20  COU,ln1-10  #read in charges from .off file, process line 1-10 of .ff file, COU section
+condition   chg,gt,0.25   rm  file=chg                             COU,ln1-10  #read in charges from a file

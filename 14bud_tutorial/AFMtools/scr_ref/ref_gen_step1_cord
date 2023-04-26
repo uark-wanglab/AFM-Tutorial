@@ -1,0 +1,74 @@
+#!/usr/bin/perl
+#This routine generate .ref file according coordinate. A molecules information file is needed.
+#The coordinate file should have at least 4 columns:$info, $xxx, $yyy, $zzz; lines with other format are not allowed.
+
+if( $ARGV[0] eq '-h' || $ARGV[0] eq '-help')
+{
+help();
+exit;
+}
+sub help {
+  print "\nGenerate the position information for the .ref file from a xyz file.\n";
+  print "A mol_info file is needed. Please refer to the manual for details.\n";
+  print "Usage: ref_gen_step1_cord  mol_info  [xyzfile] \n\n";
+}
+
+
+$bnk="     ";
+
+open (MOLI, $ARGV[0]) || die "can not open file $ARGV[0]\n";
+shift ;
+
+$comment=<MOLI>;
+
+print "TBD\n";
+print $comment;
+
+$molind=1;
+$_=<>; ($info, $xxx, $yyy, $zzz)=split;
+$save=$_;
+
+until(eof()){
+
+#print "DEBUG ".$info."  ".$next."\n";
+if (($info eq $next)|$molind==1)
+{
+#reset atomic index to one for each molecule type. 
+#$molind=1;
+$sumwgt=0.0;
+$_=<MOLI>; ($natms,$molnam,$solv)=split;
+
+for($i=0;$i<$natms;$i++)
+{ $_=<MOLI>; ($nam[$i],$wgt[$i])=split; $sumwgt+=$wgt[$i];}
+$_=<MOLI>; ($check, $next)=split;
+
+die "consistentcy check failure.\n" unless $check eq "next";
+
+}
+# end if
+
+# read input
+$cmx=0.0;$cmy=0.0;$cmz=0.0;
+for($i=0;$i<$natms;$i++)
+{
+  $_=$save;
+  #$solv=1.0;
+  #if (/&/) {$solv="1.0"} else {$solv="0.0"};
+  $cmx+=$xxx*$wgt[$i];$cmy+=$yyy*$wgt[$i];$cmz+=$zzz*$wgt[$i];
+  print $nam[$i].$bnk.$xxx.$bnk.$yyy.$bnk.$zzz.$bnk."TBD".$bnk."TBD".$bnk."TBD".$bnk.$solv.$bnk.$molind.$molnam."\n";
+  $_=<> unless eof(); ($info, $xxx, $yyy, $zzz)=split;
+  $save=$_;
+}
+ if ($sumwgt>0){
+  $comx=sprintf("%.7f",$cmx/$sumwgt);
+  $comy=sprintf("%.7f",$cmy/$sumwgt);
+  $comz=sprintf("%.7f",$cmz/$sumwgt);
+ 
+  print "NetF".$bnk.$comx.$bnk.$comy.$bnk.$comz.$bnk."TBD".$bnk."TBD".$bnk."TBD".$bnk.$solv.$bnk.$molind.$molnam."\n";
+  print "Torq".$bnk,$comx.$bnk.$comy.$bnk.$comz.$bnk."TBD".$bnk."TBD".$bnk."TBD".$bnk.$solv.$bnk.$molind.$molnam."\n";
+}
+
+$molind++;
+#end while molecule hoop
+}
+

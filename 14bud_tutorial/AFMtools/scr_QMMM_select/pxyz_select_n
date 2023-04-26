@@ -1,0 +1,36 @@
+#!/usr/bin/perl
+#This routine select and count the atoms with a mark $valm.
+
+if( $ARGV[0] eq '-h' || $ARGV[0] eq '-help')
+{
+help();
+exit;
+}
+sub help {
+    print "\nPick atoms whose mark equals to any of 'val*'.\n";
+    print "Usage: pxyz_select  file.pxyz  val1  val2  val3 ... \n\n";
+}
+
+$file=$ARGV[0];shift;
+foreach $valm (@ARGV)
+{
+open (xyz,"<", $file);
+$bnk="   ";
+$_=<xyz>;$_=<xyz>;
+
+$atmcnt=0; $molcnt=0;
+$molname="Pleasedonotusethisnameforyourmolecule";
+
+while(<xyz>) {
+($nam,$xxx,$yyy,$zzz,$mol,$val)=split;
+if ($val==$valm){
+$atmcnt++;
+print $nam.$bnk.$xxx.$bnk.$yyy.$bnk.$zzz.$bnk.$mol.$bnk.$val."\n";
+if ($molname ne $mol) {
+$molcnt++; $molname=$mol;}
+}
+}
+
+close xyz;
+print STDERR "Mark value $valm : Number of atoms $atmcnt, Number of molecules $molcnt.\n";
+}

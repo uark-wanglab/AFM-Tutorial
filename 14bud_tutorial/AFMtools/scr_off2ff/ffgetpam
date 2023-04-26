@@ -1,0 +1,32 @@
+#!/usr/bin/perl
+use List::Util qw[min max];
+$bnk="  ";
+ 
+$secname=$ARGV[0];shift;
+$recnum=$ARGV[0];shift;
+$parcol=$ARGV[0];shift;
+$filename=$ARGV[0];shift;
+
+open (FIL,$filename) || die "can not open file $filename"."\n";
+
+while(<FIL>)
+{
+if (/\[\s*$secname\s*\]/i) {
+#if (/$secname/) {
+  for ($i=0;$i<$recnum;$i++)
+  {
+  $_=<FIL>;chomp; 
+  }
+  chomp;
+  $ind1=rindex($_,"#"); $ind2=rindex($_,";"); $ind3=rindex($_,"!");
+  $ind=max($ind1,$ind2,$ind3);
+  $_ = substr $_,$ind+1;
+  $pam=(split)[$parcol-1];
+  if( $pam !~ /[a-zA-Z]/){  
+    warn "Warning: Maybe $pam is not a fix parameter.\n" unless (lc($_) =~ /fix/);}
+}
+
+}
+
+print "$pam\n";
+

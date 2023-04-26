@@ -1,0 +1,73 @@
+#!/usr/bin/perl
+$bnk=",";
+#$nam1=$ARGV[0];shift;$nam2=$ARGV[0];shift;
+$funct=$ARGV[0];shift;$pam=$ARGV[0];shift;
+$cutoff=$ARGV[0];shift;$delr=$ARGV[0];shift;
+$tabname=$ARGV[0];shift;$disp=$ARGV[0];shift;
+die "script will not overwrite existing output\n" if (-e $tabname);
+
+@param=split(/,/,$pam);
+if($funct =~ /POW/i) {
+  $nth=$param[1]; $C6=$param[0]*0.1**abs($nth)*4.184; $disp=-1/$C6 if uc($disp) eq "C6";
+  $pam=$C6.",".$nth;
+  $cmd="gentab_pow_ttp_srd POW $pam  $cutoff  $delr  $disp > $tabname";
+  print $cmd."\n"; system($cmd);
+
+} elsif ($funct =~ /TTP/i) {
+  $nth=$param[1];$C6=$param[0]*0.1**abs($nth)*4.184; $bij=10*$param[2]; $disp=-1/$C6 if uc($disp) eq "C6";
+  $pam=$C6.",".$nth.",".$bij;
+  $cmd="gentab_pow_ttp_srd TTP $pam  $cutoff  $delr  $disp > $tabname";
+  print $cmd."\n"; system($cmd);
+
+} elsif ($funct =~ /SRD/i) {
+  $nth=$param[1];$C6=$param[0]*0.1**abs($nth)*4.184; $R0ij=0.1*$param[2]; $disp=-1/$C6 if uc($disp) eq "C6";
+  $pam=$C6.",".$nth.",".$R0ij;
+  $cmd="gentab_pow_ttp_srd SRD  $pam  $cutoff  $delr  $disp > $tabname";
+  print $cmd."\n"; system($cmd);
+
+} elsif ($funct =~ /EXP/i) {
+  $A=$param[0]*4.184; $B=$param[1]*10;
+  $pam=$A.$bnk.$B;
+  $cmd="gentab_exp_buck_gexp EXP  $pam  $cutoff  $delr > $tabname ";
+  print $cmd."\n"; system($cmd);
+
+} elsif ($funct =~ /BUC/i) {
+  $A=$param[0]*4.184; $C6=$param[1]*0.1**6*4.184; $B=$param[2]*10; $disp=-1/$C6 if uc($disp) eq "C6";
+  $pam=$A.$bnk.$C6.$bnk.$B;
+  $cmd="gentab_exp_buck_gexp BUCK  $pam  $cutoff  $delr $disp> $tabname";
+  print $cmd."\n"; system($cmd);
+
+} elsif ($funct =~ /GEX/i) {
+  $A1=$param[0]*4.184; $A2=$param[1]*41.84; $A3=$param[2]*418.4; $B=$param[3]*10;
+  $pam=$A1.$bnk.$A2.$bnk.$A3.$bnk.$B;
+  $cmd="gentab_exp_buck_gexp GEX  $pam  $cutoff  $delr > $tabname ";
+  print $cmd."\n"; system($cmd);
+
+
+} elsif ($funct =~ /STR/i) {
+  $nth=$param[1];$A=$param[0]*0.1**abs($nth)*4.184; $cut=$param[2]*0.1;
+  $pam=$A.$bnk.$nth.$bnk.$cut;
+  $cmd="gentab_strc STRC  $pam  $cutoff  $delr > $tabname";
+  print $cmd."\n"; system($cmd);
+
+} elsif ($funct =~ /COUplot/i) {
+  $Qij=$param[0];
+  $cmd="gentab_cou COUplot  $pam  $cutoff  $delr > $tabname";
+  print $cmd."\n"; system($cmd);
+
+} elsif ($funct =~ /COUgmx/i) {
+  $Qij=$param[0];
+  $cmd="gentab_cou COUgmx  $pam  $cutoff  $delr > $tabname";
+  print $cmd."\n"; system($cmd);
+
+} elsif ($funct =~ /THC/i) {
+  $Qij=$param[0];
+  $aij=$param[1]*1000;
+  $pam=$Qij.",".$aij;
+  $cmd="gentab_thc THC  $pam  $cutoff  $delr > $tabname";
+  print $cmd."\n"; system($cmd);
+
+} else { 
+  die  "No executable file for [$funct], please get it first and then endit [gen_nonbonded_tab] routine.\n";
+}
+

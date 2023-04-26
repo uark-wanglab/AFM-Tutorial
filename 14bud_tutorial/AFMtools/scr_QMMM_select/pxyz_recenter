@@ -1,0 +1,99 @@
+#!/usr/bin/perl
+# This routine makes the selected atom as the centor of simulation box. Only orthorhombic box supported.
+if( $ARGV[0] eq '-h' || $ARGV[0] eq '-help')
+{
+help();
+exit;
+}
+sub help { print "\nUsage: pxyz_recenter center_atom_index file.pxyz\n\n";
+}
+
+$bnk="   ";
+
+$ido=$ARGV[0];shift;
+$ido--;
+
+$natm=<>;chomp($natm);
+$_=<>;@pbc=split;
+($box1,$box2,$box3)=split;
+die "only orthorhombic box supported.\n" if @pbc>3;
+
+for ($i=0;$i<$natm;$i++)
+{
+$_=<>;
+($nam[$i],$xxx[$i],$yyy[$i],$zzz[$i],$mol[$i],$mar[$i])=split;
+}
+
+$xo=$xxx[$ido];$yo=$yyy[$ido];$zo=$zzz[$ido];
+print STDERR "origin location: $xo  $yo  $zo\n";
+
+#recenter
+for ($i=0;$i<$natm;$i++)
+{
+
+  $dx=$xxx[$i]-$xo;
+  if ($dx>$box1/2)  { $dx=$dx-$box1; }
+  if ($dx<-$box1/2) { $dx=$dx+$box1; }
+
+  $dy=$yyy[$i]-$yo;
+  if ($dy>$box2/2)  { $dy=$dy-$box2; }
+  if ($dy<-$box2/2) { $dy=$dy+$box2; }
+
+  $dz=$zzz[$i]-$zo;
+  if ($dz>$box3/2)  { $dz=$dz-$box3; }
+  if ($dz<-$box3/2) { $dz=$dz+$box3; }
+
+  $xxx[$i]=$dx;
+  $yyy[$i]=$dy;
+  $zzz[$i]=$dz;
+}
+#end recenter
+#unwrap molecule
+$molname="crazy__";
+for ($i=0;$i<$natm;$i++)
+{
+  if ($molname ne $mol[$i]){
+    if ($i ne 0 ) {
+      for ($j=$molf+1;$j<$i;$j++) {
+        $dx=$xxx[$j]-$xxx[$molf];
+        if ($dx>$box1/2)  { $xxx[$j]=$xxx[$j]-$box1; }
+        if ($dx<-$box1/2) { $xxx[$j]=$xxx[$j]+$box1; }
+
+        $dy=$yyy[$j]-$yyy[$molf];
+        if ($dy>$box2/2)  { $yyy[$j]=$yyy[$j]-$box2; }
+        if ($dy<-$box2/2) { $yyy[$j]=$yyy[$j]+$box2; }
+
+        $dz=$zzz[$j]-$zzz[$molf];
+        if ($dz>$box3/2)  { $zzz[$j]=$zzz[$j]-$box3; }
+        if ($dz<-$box3/2) { $zzz[$j]=$zzz[$j]+$box3; }
+      }    
+    }
+    $molf=$i  #fist atom of a molecule
+  }
+  $molname = $mol[$i];
+}
+#unwarp the last molecule
+for ($j=$molf+1;$j<$natm;$j++) {
+  $dx=$xxx[$j]-$xxx[$molf];
+  if ($dx>$box1/2)  { $xxx[$j]=$xxx[$j]-$box1; }
+  if ($dx<-$box1/2) { $xxx[$j]=$xxx[$j]+$box1; }
+
+  $dy=$yyy[$j]-$yyy[$molf];
+  if ($dy>$box2/2)  { $yyy[$j]=$yyy[$j]-$box2; }
+  if ($dy<-$box2/2) { $yyy[$j]=$yyy[$j]+$box2; }
+
+  $dz=$zzz[$j]-$zzz[$molf];
+  if ($dz>$box3/2)  { $zzz[$j]=$zzz[$j]-$box3; }
+  if ($dz<-$box3/2) { $zzz[$j]=$zzz[$j]+$box3; }
+}
+#end unwrap last
+#end unwrap
+
+#output starts here
+print $natm."\n";
+print $box1.$bnk.$box2.$bnk.$box3."\n";
+for ($i=0;$i<$natm;$i++)
+{
+printf ("%4s %15.5f %15.5f %15.5f%8s %3d\n", $nam[$i],$xxx[$i],$yyy[$i],$zzz[$i],$mol[$i],$mar[$i])
+}
+

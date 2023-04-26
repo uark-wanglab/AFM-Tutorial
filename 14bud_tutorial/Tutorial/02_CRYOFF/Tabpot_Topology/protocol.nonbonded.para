@@ -1,0 +1,5 @@
+######parameter file: bonded#####################
+#
+#             chgpam/offpam                   toppam                           unitcov              extra pattern
+pam.nonbonded       srd,col4            nonbond_params,col4,ln1-18            -0.000004184                    no
+

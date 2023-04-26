@@ -1,0 +1,35 @@
+#!/usr/bin/perl
+#This routine intends to update the file name for geometry or lattice in Molpro input file.
+#The records in the same line are separated by comma.
+
+if( $ARGV[0] eq '-h' || $ARGV[0] eq '-help')
+{
+help();
+exit;
+}
+sub help {
+  print "\nReplace a comma separated fie1d that contains 'keyword' with 'newkey'.\n";
+  print "Usage: molpro_replace_field keyword newkey [molpro.inp] \n\n";
+}
+
+
+$comma=",";
+$keyword=$ARGV[0];shift;
+$val=$ARGV[0];shift;
+$buf="";
+while (<>)
+{
+if ($_ =~ /$keyword/ )
+{
+@record=split(/,/,$_);
+$nrec=@record;
+for ($i=0;$i<$nrec;$i++){
+if ($record[$i] =~ /$keyword/){ $record[$i]=$val;}
+if ($i == 0) {$buf= $record[$i];}
+else { $buf.=$comma.$record[$i];}
+}
+print $buf."\n";}
+else {print;}
+}
+
+

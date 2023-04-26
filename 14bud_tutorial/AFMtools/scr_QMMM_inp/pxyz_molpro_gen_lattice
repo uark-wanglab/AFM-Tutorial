@@ -1,0 +1,41 @@
+#!/usr/bin/perl
+#This routine generate charge lattice for molpro. 
+#$flag need to change for different case. 
+
+if( $ARGV[0] eq '-h' || $ARGV[0] eq '-help')
+{
+help();
+exit;
+}
+sub help {
+  print "\nGenerate the charge lattice for molpro from a pxyz or xyz file.\n";
+  print "Please find an example charge_info file in the manual or translation_file directory.\n";
+  print "Usage: pxyz_molpro_gen_lattice  charge_info  [file.pxyz] \n\n";
+}
+
+$chginfo=$ARGV[0];shift;
+
+die "ERROR: Partial charge file: $chginfo expected!\n" unless -e $chginfo;
+#print STDERR "Point charge information file: $chginfo.\n";
+
+open (charge,"<", $chginfo);
+while (<charge>){
+chomp;
+if ((substr $_, 0, 1) eq "#") {next;} 
+($name,$chgval,$flagval)=split;
+$chg{$name} = $chgval;
+$flag{$name} = 0 ;
+$flag{$name} = $flagval if $flagval;
+}
+
+$_=<>;chomp;$natms=$_;
+$_=<>;chomp;$comment=$_;
+
+print "comment\n";
+print $natms."\n";
+for ($i=0;$i<$natms;$i++)
+{
+$_=<>; chomp; ($nam,$xxx,$yyy,$zzz)=split;
+die "ERROR: No partial charge information found for $nam, Please check $chginfo file!" unless exists($chg{$name});
+print "$xxx,   $yyy,   $zzz,  $chg{$nam},  $flag{$nam}\n";
+}

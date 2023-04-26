@@ -1,0 +1,21 @@
+#!/usr/bin/perl
+if( $ARGV[0] eq '-h' || $ARGV[0] eq '-help')
+{
+help();
+exit;
+}
+sub help {
+  print "\nCorrect the number of water (SOL) in the top file.\n";
+  print "Usage: top_upd_mol_nu  file.gro  file.top \n\n";
+}
+
+$nwater=`grep -c OW $ARGV[0]`;
+open(TTOP,$ARGV[1]) || die "can not opne file $ARGV[1]\n";
+while(<>)
+{
+if (/SOL /)
+{
+print "SOL    $nwater\n";
+}
+else {print;}
+}

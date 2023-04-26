@@ -1,0 +1,26 @@
+#!/usr/bin/perl
+#get all the atom types of one molecule from CRYOFF.
+$bnk="    ";
+ 
+$filename=$ARGV[0];shift; 
+$molename=$ARGV[0];
+open (FIL,$filename) || die "can not open file $filename"."\n";
+
+print $molename."\n";
+while(<FIL>)
+{
+if (/MOLTYP/) {
+  if (/$molename/i) {
+    $_=<FIL>;
+    $_ =~ s/\[|\]//g;
+    ($text,$Natm)=split;
+    for ($n=0;$n<$Natm;$n++){
+      $_=<FIL>;
+      chomp;
+      ($num,$nam)=split;
+      print $num."    ".$nam."\n";
+    }
+    last;    
+  }
+  }
+}

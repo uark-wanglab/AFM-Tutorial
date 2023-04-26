@@ -1,0 +1,62 @@
+#!/usr/bin/perl
+# ./get_neutral_molecules charge QQequations
+$chgfile=$ARGV[0];shift;$equation=$ARGV[0];
+
+open (CHG,$chgfile);
+while(<CHG>) {
+  $_ =~ s/^\s+|\s+$//g;
+  if ((substr $_, 0, 1) eq "#") {next;}
+  chomp;
+  ($atm[$nchg],$x)=split;
+  $charge{$atm[$nchg]}=$x;
+  $label{$atm[$nchg]}="F"; #the charges are the original value.
+  $nchg++;
+}
+
+open(EQ,$equation);
+while(<EQ>){
+  if ((substr $_, 0, 1) eq "#") {next;} 
+  next if /^\s*$/;
+  chomp;
+  $neq++;
+  @param=split /\+|=/,$_;
+  # calculate the fitted charges of the fragment.
+  $sum=0;$natom=0;
+  for ($i=0;$i<@param-1;$i++){
+    #print $param[$i];
+    $param[$i] =~ s/^\s+|\s+$//g;
+    ($factor,$atom)=split /\s+/,$param[$i];
+    $natom=$natom+$factor if $label{$atom} eq "F"; # will adjust the charges if they are still the original value.
+    $sum=$sum+$factor*$charge{$atom};
+  }
+  $frag_chg=$param[@param];
+  $delta=($sum-$frag_chg)/$natom;
+
+  # remove the exceeded charges from each atom.
+   $sum=0;$natom=0;
+   for ($i=0;$i<@param-1;$i++){
+     ($factor,$atom)=split /\s+/,$param[$i];
+     $natom=$natom+$factor;
+     $charge{$atom}=sprintf("%.5f",$charge{$atom}-$delta) if $label{$atom} eq "F";
+     $label{$atom}="Y"; # record the change.
+     $sum=$sum+$factor*$charge{$atom};
+   }  
+   $delta=sprintf("%.5f",$sum-$frag_chg);
+
+  # make the sum of the charges to be correct to the order of 0.00001.
+   $pickatom=<EQ>;
+   ($factor,$atom)=split /\s+/,$pickatom;
+   $check=$delta*100000%$factor;
+   if ($check != 0 ) {
+   print "\nCannot make the fragment [$neq] fit the charge constraint [$neq] using the picked atom. The excceded charge is $delta.\nplease change to another picked atom or adjust the charges by hand.\n\n"; }
+   else {
+#   print "$delta\n";
+   $delta = sprintf("%.5f",$delta/$factor);
+   $charge{$atom}= $charge{$atom}-$delta;
+   }
+}
+
+for ($i=0;$i<$nchg;$i++){
+  print "$atm[$i]   $charge{$atm[$i]} \n";
+}
+

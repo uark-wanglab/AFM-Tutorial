@@ -1,0 +1,21 @@
+#!/usr/bin/perl
+$type=$ARGV[0];shift;$pam=$ARGV[0];shift;$rcut=$ARGV[0];shift;$delr=$ARGV[0];shift;$disp=$ARGV[0];shift;
+
+@param=split(/,/,$pam);
+die "Three parameters are needed, but @param were passed to the scripts" if @param != 3;
+$A=$param[0];$nth=$param[1];$RC=$param[2];
+
+$nbins=int($rcut/$delr)+1;  
+
+for($i=0;$i<=$nbins;$i++)
+{
+    $r=$delr*$i;
+    
+    if ($i<=10)  {$g=0.0;$gprime=0.0;}
+    elsif ( $r <= $RC) {
+      $h=$A*(1/$r**$nth-1/$RC**$nth+$nth*($r-$RC)/$RC**($nth+1));
+      $hprime=-(-$A*$nth/$r**($nth+1)+$A*$nth/$RC**($nth+1));
+    } else {$h=0;$hprime=0}
+
+    printf("%20.8e %20.8e %20.8e %20.8e %20.8e %20.8e %20.8e\n", $r,0.0,0.0,0.0,0.0,$h,$hprime);
+}

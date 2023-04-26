@@ -1,0 +1,20 @@
+#!/usr/bin/perl
+$basename=$ARGV[0];shift;
+$counter="000";
+while(<>)
+{
+$filename="$basename$counter.xyz";
+open(OUT,'>',"$filename");
+chomp;
+$natms=$_;
+print OUT $natms."\n";
+print $natms." atoms in file ";
+print $filename."\n";
+$_=<>;print OUT $_;
+for($i=0;$i<$natms;$i++)
+{
+$_=<>;
+print OUT $_;
+}
+$counter++;
+}

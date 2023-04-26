@@ -1,0 +1,43 @@
+#!/usr/bin/perl
+$atm1=$ARGV[0]; shift;
+$atm2=$ARGV[0]; shift;
+#only test the first 200 atoms to speed it up
+$ncheck=200;    
+
+$frame=0;$min=9999;
+while($natm=<>){
+$_=<>;chomp;
+$dist1=9999; $dist2=9999;
+
+for ($i=0;$i<$natm;$i++)
+{
+$_=<>;
+($nam[$i],$xxx[$i],$yyy[$i],$zzz[$i])=split;
+}
+
+$ncheck=$natm;
+
+for ($i=0;$i<$ncheck-1;$i++)
+{
+  for ($j=$i+1;$j<$ncheck;$j++)
+   {
+      if ($nam[$i] eq $atm1 && $nam[$j] eq $atm2 || $nam[$i] eq $atm2 && $nam[$j] eq $atm1){
+      $dist=($xxx[$i]-$xxx[$j])*($xxx[$i]-$xxx[$j]);
+      $dist+=($yyy[$i]-$yyy[$j])*($yyy[$i]-$yyy[$j]);
+      $dist+=($zzz[$i]-$zzz[$j])*($zzz[$i]-$zzz[$j]);
+      $dist=sqrt($dist);
+      if ($dist2 > $dist) {
+         $descr="$i"."_"."$j"; 
+         if ($dist1 > $dist) { $dist2 = $dist1; $descr2=$descr1; $dist1 = $dist; $descr1=$descr}
+           else {$dist2=$dist;$descr2=$descr};
+      }
+      $min=$dist1 if $dist1 < $min;
+      }
+   }
+}
+
+print "frame ".$frame." dist1: ".$descr1."  ".$dist1."\n";
+print "frame ".$frame." dist2: ".$descr2."  ".$dist2."\n";
+$frame++;
+}
+print "minimum distance for $atm1 ~ $atm2 : ".$min."\n";

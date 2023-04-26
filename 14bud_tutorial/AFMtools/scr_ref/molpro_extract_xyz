@@ -1,0 +1,30 @@
+#!/usr/bin/perl
+if( $ARGV[0] eq '-h' || $ARGV[0] eq '-help')
+{
+help();
+exit;
+}
+sub help {
+  print "\nExtract atomic positions from a Molpro output file.\n";
+  print "Usage: molpro_extract_xyz  molpro_out\n\n";
+}
+
+
+$conv=0.5291772083;
+while(<>)
+{
+if (/ATOMIC COORDINATES/) {
+$_=<>;$_=<>;$_=<>;
+$ind=1;
+$natm=-1;
+while($ind>0){ $_=<>; $natm++;
+($ind, $name, $chg, $xxx, $yyy,$zzz)=split;
+$xxx*=$conv;$yyy*=$conv;$zzz*=$conv;
+$buf.=$name."  ".$xxx."  ".$yyy."   ".$zzz."\n" if $ind>0;
+}
+print $natm."\n"."comment\n";
+print $buf;
+}
+}
+
+

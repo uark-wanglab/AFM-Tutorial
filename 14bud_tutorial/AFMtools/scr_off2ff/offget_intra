@@ -1,0 +1,47 @@
+#!/usr/bin/perl
+if( $ARGV[0] eq '-h' || $ARGV[0] eq '-help')
+{
+help();
+exit;
+}
+sub help {
+  print "\nExtract the bonded parameters from the off file.\n";
+  print "Usage: offget_intra file.off  mol_name \n\n";
+}
+
+$bnk="    ";
+ 
+$filename=$ARGV[0];shift; 
+open (FIL,$filename) || die "can not open file $filename"."\n";
+
+while(<FIL>)
+{
+if (/Molecular-Definition/) {
+  $npot=0;
+  while(<FIL>) {
+    if (/Table-Potential/) { last; } 
+    else {
+      chomp; $tmp=$_;
+      push @pot, "$tmp";
+      $npot++;
+    } 
+  }
+}
+}
+$buf="";
+for ($i=0;$i<@ARGV;$i++)
+{
+  $getmol=$ARGV[$i];
+  for ($j=0;$j<$npot;$j++){
+    $str=$pot[$j];
+    if ($str =~ /$getmol/i) {
+      print $str."\n";
+      for ($k=$j+1;$k<$npot;$k++) {
+        $str=$pot[$k];
+        if ($str =~ /define/) {
+          print $str."\n";
+        } else { $j=$k;last;}
+      } 
+    }
+  }
+}

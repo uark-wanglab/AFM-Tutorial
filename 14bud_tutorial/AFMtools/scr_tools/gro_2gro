@@ -1,0 +1,30 @@
+#!/usr/bin/perl
+#correct the  inconsecutive index for a gro file.
+#only works for molecules and atoms less than 10000, the molecule name should be 3 characters
+#
+$bnk="  ";
+$_=<>;print;
+$_=<>;print;
+chomp;$natm=$_;
+
+
+$oldindex=1;$nmol=1;
+for ($i=0;$i<$natm;$i++)
+{
+$_=<>;
+($nam,$x1,$x2,$x3,$x4,$x5,$x6,$x7,$x8)=split;
+$count++;
+$size=length($nam);
+$index=substr $nam,0,3 if $size<=6;
+$index=substr $nam,0,4 if $size==7;
+$groname=substr $nam,-3;
+if ($index > $oldindex) {
+$nmol++;
+$oldindex=$index;
+}
+  printf ("%5d%-5s%5s%5d%8.3f%8.3f%8.3f\n", $nmol,$groname,$x1,$count,$x3,$x4,$x5);
+  #printf ("%5d%-5s%5s%5d%8.3f%8.3f%8.3f%8.4f%8.4f%8.4f\n", $nmol,$groname,$x1,$count,$x3,$x4,$x5,$x6,$x7,$x8);
+}
+
+$_=<>;
+print;

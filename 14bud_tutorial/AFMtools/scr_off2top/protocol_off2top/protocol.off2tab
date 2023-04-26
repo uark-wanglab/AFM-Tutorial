@@ -1,0 +1,12 @@
+
+######## generate table files ######################
+#                        grid-def                        #extra pattern    
+tab.nonbond         cutoff,deltr,ln1-10             type=atmtype,prefix=Ala7
+tab.nonbond         cutoff,deltr,ln1-10             type=atmtype,scale=C6
+tab.nonbond         2,0.1,ln1-10                           default
+
+
+##TO DO##########
+#bonded.table  
+
+

@@ -1,0 +1,55 @@
+#!/usr/bin/perl
+if( $ARGV[0] eq '-h' || $ARGV[0] eq '-help')
+{
+help();
+exit;
+}
+sub help {
+  print "\nCalculate the net force (NetF) and torque (Torq) for a ref file.\n";
+  print "Usage: ref_upd_net  [file.ref] \n\n";
+}
+
+
+$bnk="     ";
+
+$_=<>;print;
+$_=<>;print;
+$i=0;
+
+while(<>)
+{
+
+($nam,$xxx[$i],$yyy[$i],$zzz[$i], $frx[$i], $fry[$i], $frz[$i],$solv,$molnam)=split;
+
+if ($nam eq "NetF") {
+$natm=$i; $i=-1;
+$fnx=0.0;$fny=0.0;$fnz=0.0;
+$tqx=0.0;$tqy=0.0;$tqz=0.0;
+$_=<>;
+($nam,$cox,$coy,$coz)=split;
+
+for ($j=0;$j<$natm;$j++)
+{
+$fnx+=$frx[$j];$fny+=$fry[$j];$fnz+=$frz[$j];
+$tqx+=($yyy[$j]-$coy)*$frz[$j]-($zzz[$j]-$coz)*$fry[$j];
+$tqy+=($zzz[$j]-$coz)*$frx[$j]-($xxx[$j]-$cox)*$frz[$j];
+$tqz+=($xxx[$j]-$cox)*$fry[$j]-($yyy[$j]-$coy)*$frx[$j];
+}
+
+print "NetF$bnk$xxx[$j]$bnk$yyy[$j]$bnk$zzz[$j]$bnk";
+printf "%12.7f$bnk%12.7f$bnk%12.7f",$fnx,$fny,$fnz;
+print $bnk.$solv.$bnk.$molind.$molnam."\n";
+
+print "Torq$bnk$cox$bnk$coy$bnk$coz$bnk";
+printf "%12.7f$bnk%12.7f$bnk%12.7f",$tqx,$tqy,$tqz;
+print $bnk.$solv.$bnk.$molind.$molnam."\n";
+
+}
+else{ print;};
+
+$i++;
+
+}
+
+
+

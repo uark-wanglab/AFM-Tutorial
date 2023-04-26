@@ -1,0 +1,45 @@
+#!/usr/bin/perl
+
+if( $ARGV[0] eq '-h' || $ARGV[0] eq '-help')
+{
+help();
+exit;
+}
+sub help { 
+  print "\nSkip the first 'nskip' lines and print 'nlines' of the input file.\n";
+  print "Usage: chunk  nskip  nlines  [file1 file2 ...] \n\n";
+}
+
+
+$skip=$ARGV[0];shift;
+$nlins=$ARGV[0];shift;
+
+for($j=0;$j<@ARGV;$j++)
+{
+open (FIL,"$ARGV[$j]") || die "can not open file $ARGV[$j]";
+
+for ($i=0;$i<$skip;$i++){$_=<FIL>;}
+
+$i=0;
+while(<FIL>)
+{
+print if ($i<$nlins);
+$i++;
+}
+}
+
+if (@ARGV==0)
+{
+
+for ($i=0;$i<$skip;$i++){$_=<STDIN>;}
+
+$i=0;
+while(<STDIN>)
+{
+print if $i<$nlins;
+$i++;
+}
+
+}
+
+

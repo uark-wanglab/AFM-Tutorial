@@ -1,0 +1,30 @@
+#!/usr/bin/perl
+#This routine mark within the molecules of the atoms whose mark value equals to $valm
+
+if( $ARGV[0] eq '-h' || $ARGV[0] eq '-help')
+{
+help();
+exit;
+}
+sub help {
+  print "\nMark up molecules within ‘rcut’ of atoms whose mark is 'mark_val'. These molecules will be marked as 'mark_val_boundary'.\n";
+  print "Usage: mark_boundary rcut mark_val  mark_val_boundary file.pxyz\n\n";
+}
+
+
+$rcu=$ARGV[0];shift;
+#This is the value marked already
+$valm=$ARGV[0];shift; 
+#This is the value to be used for boundary atom 
+$val=$ARGV[0];shift;
+$filename=$ARGV[0];
+
+@list=`grep -n \" $valm\$\" $filename`;
+for ($i=0;$i<@list;$i++)
+{
+($ind)=split(/:/,$list[$i]);
+$ind=$ind-2;
+$cmd="mark_within $ind $rcu $val $filename > $filename._$$; mv $filename._$$ $filename";
+#print $cmd."\n";
+system("$cmd");
+}

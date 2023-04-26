@@ -1,0 +1,33 @@
+#!/usr/bin/perl
+#This routine intends to update some keyword in PQS input file, mainly the file name for geometry.
+#The records in the same line are separated by blank.
+#
+if( $ARGV[0] eq '-h' || $ARGV[0] eq '-help')
+{
+help();
+exit;
+}
+sub help {
+  print "\nReplace a blank separated field that contains 'keyword' with 'newkey'.\n";
+  print "Usage: molpro_replace_field keyword newkey [molpro.inp] \n\n";
+}
+
+$bnk="  ";
+$keyword=$ARGV[0];shift;
+$val=$ARGV[0];shift;
+$buf="";
+while (<>)
+{
+if ($_ =~ /$keyword/ )
+{
+@record=split;
+$nrec=@record;
+for ($i=0;$i<$nrec;$i++){
+if ($record[$i] =~ /$keyword/){ $record[$i]=$val;}
+$buf.=$record[$i].$bnk;
+}
+print $buf."\n";}
+else {print;}
+}
+
+

@@ -1,0 +1,35 @@
+#!/usr/bin/perl
+
+$u1= "usage: tabdownsamp range freq filename [filename]\n";
+$u2= "Note: the script modify the xvg file in place.\n";
+
+die "$u1$u2" if (@ARGV < 3);
+
+$rang=$ARGV[0];
+$freq=$ARGV[1];
+$freq=1 if $freq==0;
+
+for ($i=2;$i<@ARGV;$i++)
+{
+open(TABF,'+<',$ARGV[$i]) || die "can not open file  $ARGV[$i]";
+$cnt=1;
+$ind=0;
+while(<TABF>)
+{
+($dis)=split;
+if (($dis<=$rang) and ($cnt==1)) 
+{ $dat[$ind++]=$_;}
+$cnt++;
+$cnt=1 if ($cnt>$freq);
+}
+#print "$dis  $rang   $ind\n";
+
+seek(TABF,0,0);
+truncate TABF, 0;
+for ($j=0;$j<$ind;$j++){
+ print TABF $dat[$j];}
+
+# print $j;
+ close TABF;
+}
+

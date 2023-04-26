@@ -1,0 +1,45 @@
+#!/usr/bin/perl
+
+$ref=$ARGV[0];shift;
+
+foreach $pair (@ARGV)
+{
+@list=split /~/,$pair;
+$ind[$n][1]=$list[0];
+$ind[$n][2]=$list[1];
+$n++;
+}
+$npair=$n;
+$bnk="     ";
+
+open (REF,$ref);
+while (<REF>) {
+  @nrec=split;
+  if (@nrec == 1) {
+    chomp;
+    $natoms=$_;
+    $_=<REF>;
+    for ($i=1;$i<=$natoms;$i++) {
+      $_=<REF>;
+      ($nam,$xxx[$i],$yyy[$i],$zzz[$i], $frx[$i], $fry[$i], $frz[$i],$solv,$molnam)=split;
+    }
+    for ($n=0;$n<$npair;$n++) {
+      #print $xxx[$ind[$n][2]].$bnk.$xxx[$ind[$n][1]]."\n";
+      $rx=$xxx[$ind[$n][2]]-$xxx[$ind[$n][1]];
+      $ry=$yyy[$ind[$n][2]]-$yyy[$ind[$n][1]];
+      $rz=$zzz[$ind[$n][2]]-$zzz[$ind[$n][1]];
+      $r=sqrt($rx**2+$ry**2+$rz**2); 
+      $rex=$rx/$r; $rey=$ry/$r; $rez=$rz/$r;
+      $dfx=$frx[$ind[$n][2]]-$frx[$ind[$n][1]];
+      $dfy=$fry[$ind[$n][2]]-$fry[$ind[$n][1]];
+      $dfz=$frz[$ind[$n][2]]-$frz[$ind[$n][1]];
+      $df=sqrt($dfx**2+$dfy**2+$dfz**2);
+      $pf=$dfx*$rex+$dfy*$rey+$dfz*$rez;
+      $cos=$pf/$df;
+      print $r.$bnk.$pf.$bnk.$cos.$bnk.$ind[$n][1].$bnk.$ind[$n][2]."\n";
+    }
+    
+  } else {
+    die "Number of atoms in the first line of the frame is not right, please check $ref file.";
+  }
+}

@@ -1,0 +1,61 @@
+#!/usr/bin/perl
+$chgpam=$ARGV[0];shift;$ffpam=$ARGV[0];shift;
+$inputoff=$ARGV[0];shift;$inpff=$ARGV[0];shift;$outff = $ARGV[0];shift;
+$tmpfile = "/tmp/tempoff2ff.$$"; $tmpfil2 = "/tmp/tempoff2f2.$$";
+system ("cp $inpff $tmpfile");
+die "script will not overwrite existing output\n" if (-e $outff);
+
+#get atom charges
+if ( $chgpam =~ /file/i ){
+  @off=split /=/,$chgpam; $file=$off[1];
+  open(CHGFILE,"<",$file);
+  while(<CHGFILE>) {
+    ($nam,$charge)=split; $chg{$nam}=$charge;
+    $n++; } #get atom charges from a file 
+  print "Get ".$n." atom charges from ".$file." file.\n";
+} elsif ($chgpam =~ /neu/i){
+  $zero=1;
+} else {
+  @total=`offget_charge $chgpam  $inputoff`;
+  for ($j=0;$j<@total;$j++)
+  {
+    $str=$total[$j];chomp($str); $str =~ s/^\s+|\s+$//g;
+    @temp=split /\s+/,$str;
+    $nam=$temp[0];$chg{$nam}=$temp[4];
+  }
+} #end get atom charges from off file
+
+#parameter position in ff file
+@ff=split(',',$ffpam);  # parameter position in ff file
+$keywordff=$ff[0];
+$pamcolff=substr $ff[1],3;
+if ( @ff == 2) {
+  die "Please provide the line number of charge product in .ff file!\n"; 
+} else {
+  for ($n=2;$n<@ff;$n++) {
+    $ff[$n]= substr $ff[$n],2; @templn=split(/-/,$ff[$n]);
+    $templn[1]=$templn[0] unless $templn[1] > $templn[0];
+    for ($j=$templn[0];$j<=$templn[1];$j++){ $ln[$idx]=$j; $idx++; } }
+} # line number are provided.
+
+print "Update charge product:\n";
+for ($i=0;$i<$idx;$i++) {
+  $line=$ln[$i];
+  $temp=`ffgetpam  $keywordff $line 1 $inpff`;chomp($temp);$nam1=uc($temp) ;#first atom name
+  $temp=`ffgetpam  $keywordff $line 2 $inpff`;chomp($temp);$nam2=uc($temp) ; #second atom name
+  if ($zero) { 
+    $update=1; $chgprod=0; 
+    print "Zero charge procduct: $nam1 $nam2 \n"}
+  elsif ( $chg{$nam1} == 0 or $chg{$nam2} == 0)  {
+    $update=0;
+    print "No update for the charge product $nam1~$nam2, one of the chareges is zero or undefined.\n";
+  } else { 
+    $update=1;$chgprod=$chg{$nam1}*$chg{$nam2};
+    print "Update the charge product of $nam1~$nam2: $chg{$nam1}    $chg{$nam2}    $chgprod.\n";
+  }
+    
+  if ($update) {
+    system("ffupdbynum $keywordff $line $pamcolff $chgprod $tmpfile > $tmpfil2; mv $tmpfil2 $tmpfile"); }
+}
+  
+system ("mv $tmpfile $outff");

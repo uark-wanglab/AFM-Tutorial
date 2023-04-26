@@ -1,0 +1,34 @@
+#!/usr/bin/perl
+$bnk="    ";
+$section=$ARGV[0];shift;
+$pamln=$ARGV[0];shift;$pamcol=$ARGV[0];shift;$inputpam=$ARGV[0];shift;
+$topfile=$ARGV[0];
+
+open (TOP,$topfile);
+while(<TOP>)
+{
+  $_ =~ s/^\s+//g;
+  if ((substr $_, 0, 1) eq ";") {print; next; }
+  if (/$section/i) {
+    print;
+    for ($i=0;$i<$pamln;$i++) {
+      $_=<TOP>;
+      $_ =~ s/^\s+//g;
+      if ((substr $_, 0, 1) eq ";") {print; $i--; next; }
+      elsif ( /^\s*$|\[/ ) {die "No line number [ $pamln ] is found in $molecule.[ $section ] !"} 
+      else { print  unless ($i == $pamln -1); }
+    }
+    chomp;
+    @output=split;
+    $output[$pamcol-1]=$inputpam;
+    $buf=$output[0];
+    for ($i=1;$i<@output;$i++) { $buf=$buf.$bnk.$output[$i]; }
+    $buf=$buf."\n";
+    print $buf;
+    $update=1;
+  } else {
+    print;
+  }
+} #end  loop
+
+die "No [$section] is found in [$topfile]!" unless $update==1;

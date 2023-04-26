@@ -1,0 +1,61 @@
+#!/usr/bin/perl
+$offpam=$ARGV[0];$ffpam=$ARGV[1];
+$inputoff=$ARGV[2];$inpff = $ARGV[3]; $outff = $ARGV[4];
+$tmpfile = "/tmp/tempoff2ff.$$"; $tmpfil2 = "/tmp/tempoff2f2.$$";
+system ("cp $inpff $tmpfile");
+die "script will not overwrite existing output\n" if (-e $outff);
+
+#get potential from off file.
+@off=split(',',$offpam); 
+$keyword=$off[0]; $offcol=substr $off[1],3;
+$getpot=$keyword;  
+if ( @off > 1 and $off[1] =~ /ln/) { $beg=1; } else { $beg=2; }
+for ($n=$beg;$n<@off;$n++) { $getpot=$getpot.",".$off[$n]; }
+@total=`offget_inter $inputoff $getpot`;
+
+#parameter position in ff .file.
+@ff=split(',',$ffpam); 
+$keywordff=$ff[0];
+if( lc($ff[1]) eq "fix" or lc($ff[1]) eq "fit" ) {
+  $copysec=1;   #copy section
+  print "Add [ ".@total." ] terms to [ $keywordff ] section.\n";
+} else {
+  $idx=0;
+  if ( @ff == 2) {
+    for ($idx=0;$idx<@total;$idx++) {$ln[$idx]=$idx+1;} #no line number are provided.
+  } else {
+    for ($n=2;$n<@ff;$n++) {
+      $ff[$n]= substr $ff[$n],2; @templn=split(/-/,$ff[$n]);
+      $templn[1]=$templn[0] unless $templn[1] > $templn[0];
+      for ($j=$templn[0];$j<=$templn[1];$j++) { $ln[$idx]=$j; $idx++;"\n"; } }
+  } # line number are provided.
+  die "Get ".@total."  parameters, but update $idx parameters." if $idx != @total ;
+  print "Update ".$idx." parameters for $keywordff section.\n"; 
+}
+
+for ($ip=0;$ip<@total;$ip++)  #update ff file
+{
+  $str=$total[$ip]; chomp($str); $str =~ s/^\s+|\s+$//g;
+  @ipot=split /\s+/,$str;
+  if ( $copysec ) {
+    $fit=$ff[1];
+    $nam1=@ipot[0];$nam2=@ipot[1];
+    $pot=$keywordff.",".$nam1.",".$nam2.",".$fit;
+    for ($i=3;$i<@ipot;$i++) {
+      if ( $ipot[$i] ne "Min") { $pot=$pot.",".$ipot[$i];
+      } else {
+        $action="add";
+        system("ffaddremtermbynam $action $pot $tmpfile > $tmpfil2 ; mv $tmpfil2 $tmpfile"); 
+        last;
+      }
+    } 
+  } else {
+     $ffcol=substr $ff[1],3; $ffln=$ln[$ip];
+     $pam=$ipot[$offcol-1];
+     print "Parameter obtained: ".$pam." Update Col: ".$ffcol." Ln: ".$ffln."\n";
+     system("ffupdbynum $keywordff $ffln $ffcol $pam $tmpfile > $tmpfil2; mv $tmpfil2 $tmpfile");
+  }
+}
+
+system ("mv $tmpfile $outff");
+

@@ -1,0 +1,53 @@
+; Run parameter
+integrator          =  md			; MD
+dt                  =  5E-4	    ; time step(ps), 0.5 fs
+nsteps              = 20000	;number of steps, 5000 ps 
+
+; Output control
+nstlog              =  1000   ; update log file every 1.0 ps
+nstenergy           =  1000   ; save energies every 1.0 ps
+nstxtcout           =  1000   ;save every 0.5 ps for trimming
+;nstxout            =  1000   ; save coordinates every 1.0 ps
+;nstvout            =  1000    ; save velocities every 1.0 ps
+
+;Neighborsearching
+cutoff-scheme       =  Group 
+ns_type             =  grid			; pairlist method
+nstlist             =  1			; update pairlist
+rlist               =  1			; cut-off for ns
+
+
+energygrps          = OW  HW  MW  H1  H2 H3  C1  C2  O1
+energygrp_table     =  OW  C1  OW  C2  OW  O1  OW  H1  OW  H3  O1  O1  C2  O1  C1  O1  C1  C1  H3  O1  H2  C1  H2  H3  H1  O1  H1  C2  H1  H2  HW  O1  HW  C2  HW  H2  OW  OW  HW  MW   
+
+DispCorr            =  EnerPres
+vdwtype             =  user
+rvdw                =  1		; cut-off for vdw
+coulombtype         =  pme
+rcoulomb            =  1		; cut-off for coulomb
+pme_order           =  4
+ewald_rtol          =  1E-5
+
+; Temperature coupling is on
+;tcoupl		= V-rescale	            ; modified Berendsen thermostat
+tcoupl          = nose-hoover
+tc-grps             =  System
+ref_t               =  298
+tau_t               =  1.0
+
+; Pressure coupling is on
+;pcoupl		= Berendsen 		;NPT, no pressure coupling in NVT
+pcoupl          = Parrinello-Rahman
+pcoupltype          = isotropic     ; uniform scaling of x-y-z box vectors
+tau_p               = 5.0           ; time constant, in ps
+ref_p               = 1.0           ; reference pressure (in bar)
+compressibility     = 4.5e-5        ; isothermal compressibility, bar^-1
+refcoord_scaling    = com
+
+; Periodic boundary conditions
+pbc		= xyz		    ; 3-D PBC
+
+; Velocity generation
+gen_vel             =  no ;  			; generate initial velocities
+gen_temp            =  298			; initial temperature
+gen_seed            =  -1			; random seed

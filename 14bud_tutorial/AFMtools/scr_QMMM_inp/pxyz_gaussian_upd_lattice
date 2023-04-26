@@ -1,0 +1,49 @@
+#!/usr/bin/perl
+#This routine updates the charge lattice section in Gaussian input file.
+
+if( $ARGV[0] eq '-h' || $ARGV[0] eq '-help')
+{
+help();
+exit;
+}
+sub help {
+  print "\nUpdate the charge lattice for the gaussian input file from a pxyz or xyz file.\n";
+  print "The keyword 'charge_latt' is needed at the start of the charge lattice section.\n";
+  print "Please find an example charge_info file in the manual or translation_file directory.\n"
+  print "Usage: pxyz_gaussian_upd_lattice  gaussian.inp  charge_info  [file.pxyz] \n\n";
+}
+
+$templ=$ARGV[0];shift; #This is Gaussian input file
+$chginfo=$ARGV[0];shift; #This is charge information
+
+die "ERROR: Molpro template file: $templ expected!\n" unless -e $templ;
+die "ERROR: NameTranslation file: $chginfo expected!\n" unless -e $chginfo;
+$shlwarn=0;
+
+open (charge,"<", $chginfo);
+while (<charge>){
+chomp;
+if ((substr $_, 0, 1) eq "#") {next;}
+($name,$chgval)=split;
+$chg{$name} = $chgval;
+}
+
+
+open (GAU,"<", $templ); 
+while (<GAU>) {
+ unless (/charge_latt/i) {print ;}
+ else {
+   $_=<>;chomp;$natms=$_;
+   $_=<>;
+   for($i=0;$i<$natms;$i++) {
+     $_=<>; chomp; ($nam, $xxx, $yyy, $zzz)=split;
+     die "ERROR: No partical charge found for $nam, Please check $chginfo file!" unless exists($chg{$nam});
+     printf ("%16.8f %16.8f %16.8f %16.8f\n", $xxx,$yyy,$zzz,$chg{$nam});
+   }
+   do {$_=<GAU>} until ( $_ =~ /^\s*$/);
+   print $_;
+ }
+} 
+
+print STDERR "Warning: At least one atom name is not in the NameTranslation file.\n" if ($shlwarn);
+

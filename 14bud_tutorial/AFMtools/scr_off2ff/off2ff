@@ -1,0 +1,75 @@
+#!/usr/bin/perl
+if( $ARGV[0] eq '-h' || $ARGV[0] eq '-help')
+{
+help();
+exit;
+}
+sub help {
+  print "\nUpdate a template ff file from an off file.\n";
+  print "Please refer to the manual about the format of the protocol file.
+Examples can be found in the protocol directory.\n";
+  print "Usage: off2ff  protocol  off template_ff  final_ff  \n\n";
+}
+
+
+$protfile=$ARGV[0];$inputoff=$ARGV[1];$inpff = $ARGV[2]; $outff = $ARGV[3];
+$tmpfile = "/tmp/tempoff2ff.$$"; $tmpfil2 = "/tmp/tempoff2f2.$$";
+system ("cp $inpff $tmpfile");
+die "no $tmpfile \n" unless ( -e $tmpfile);
+die "script will not overwrite existing output\n" if (-e $outff);
+
+open(PRO,$protfile);
+while(<PRO>)
+{
+if ( $_ =~ /^\s*$|#/) {next;}
+print "\nProtocol: ";print;
+($what)=split;
+
+if($what eq "copy") {
+  ($what,$offpam,$ffpam)=split;
+  system("off2ff_copy $offpam  $ffpam  $inputoff $tmpfile $tmpfil2 ; mv $tmpfil2 $tmpfile");  
+
+} elsif ($what eq "populate") {
+  ($what,$offpam,$ffpam)=split;
+  system("off2ff_copy $offpam  $ffpam  $inputoff $tmpfile $tmpfil2 ; mv $tmpfil2 $tmpfile");
+
+} elsif ($what eq "charge") {
+  ($what,$chgpam,$ffpam)=split;
+  system("off2ff_charge  $chgpam  $ffpam  $inputoff $tmpfile $tmpfil2 ; mv $tmpfil2 $tmpfile");
+
+
+} elsif ($what eq "condition") {
+  ($what,$condition,$action,$offpam,$ffpam)=split;
+  @cond=split(',',$condition); #parameter postion in off file
+  $keyword=$cond[0];
+  if ($keyword eq "dist") {
+    print "$action terms from $ffpam : \n";
+    system("off2ff_bymindist $condition $action $offpam $ffpam $inputoff $tmpfile $tmpfil2 ; mv $tmpfil2 $tmpfile");
+  } elsif ($keyword eq "val") {
+    @pot=split(',',$ffpam); 
+    print "$action terms from $pot[0] :\n";
+    system("off2ff_byvalue $condition  $action $offpam $ffpam $inputoff $tmpfile $tmpfil2 ; mv $tmpfil2 $tmpfile");
+  } elsif ($keyword eq "max") {
+    @pot=split(',',$ffpam);
+    print "$action the maximum term from $pot[0] :\n";
+    system("off2ff_bymaxminpam $condition $action $offpam $ffpam $inputoff $tmpfile $tmpfil2 ; mv $tmpfil2 $tmpfile")
+  } elsif ($keyword eq "min") {
+    @pot=split(',',$ffpam);
+    print "$action the minimum term from $pot[0] :\n";
+    system("off2ff_bymaxminpam $condition $action $offpam $ffpam $inputoff $tmpfile $tmpfil2 ; mv $tmpfil2 $tmpfile")
+  } elsif ($keyword eq "chg"){
+    ($what,$condition,$action,$chgpam,$ffpam)=split;
+    print "$action terms from $ffpam according charge product:\n";
+    system("off2ff_bychgprot  $condition $action  $chgpam  $ffpam $inputoff $tmpfile $tmpfil2 ; mv $tmpfil2 $tmpfile")   
+  } else { 
+    print "No rules for this condition: $ffpam \n";
+  }
+
+} else { 
+  die  "unkown action: $what.\n";
+}
+
+} #end while
+
+system ("mv $tmpfile $outff");
+

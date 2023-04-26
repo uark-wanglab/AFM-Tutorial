@@ -1,0 +1,39 @@
+#!/usr/bin/perl
+#This routine generate the point charge file for pqs.
+
+if( $ARGV[0] eq '-h' || $ARGV[0] eq '-help')
+{
+help();
+exit;
+}
+sub help {
+  print "\nGenerate the pqs point charge file from a pxyz or xyz file.\n";
+  print "Please find an example charge_info file in the manual or translation_file directory.\n";
+  print "Usage: pxyz_pqs_gen_pntq charge_info  [file.pxyz] \n\n";
+}
+
+
+
+$chginfo=$ARGV[0];shift;
+die "ERROR: Partical charge file: $chginfo expected!\n" unless -e $chginfo;
+
+open (charge,"<", $chginfo);
+while (<charge>){
+chomp;
+($name,$chgval,$dum)=split;
+$chg{$name} = $chgval ;
+$dummy{$name} = "Q";
+$dummy{$name} = $dum if $dum;
+}
+
+$_=<>;chomp;$natms=$_;
+$_=<>;
+
+print $natms."\n"; 
+print "an\n";
+
+while (<>) {
+chomp; ($nam, $xxx, $yyy, $zzz)=split;
+die "ERROR: No partical charge found for $nam, Please check $chginfo file!" unless exists($chg{$nam});
+printf ("%4s  %16.8f %16.8f %16.8f %16.8f\n", $dummy{$nam},$xxx,$yyy,$zzz,$chg{$nam});
+}  

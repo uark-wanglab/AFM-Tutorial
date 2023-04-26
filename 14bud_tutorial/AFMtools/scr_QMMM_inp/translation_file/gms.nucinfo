@@ -1,0 +1,24 @@
+#coment lines start with "#", can exist in any place and not a must.
+#This file provides the nuclear charge for atoms. 
+#It also provides the name translation if the third column exists. 
+#The third column for a atom can exist or leave it empty.
+#
+#Name   Z   QMname(optional)
+H       1     H
+H1      1     H
+H2      1     H
+H3      1     H
+HB1     1     H
+HB2     1     H
+HB3     1     H
+HA      1     H
+HW1     1     H
+HW2     1     H
+C       6     C
+CA      6     C
+CB      6     C
+N       7     N
+O       8     O
+OC1     8     O
+OC2     8     O
+OW      8     O

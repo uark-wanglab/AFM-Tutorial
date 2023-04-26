@@ -1,0 +1,44 @@
+#!/usr/bin/perl
+use warnings;
+if( $ARGV[0] eq '-h' || $ARGV[0] eq '-help')
+{
+help();
+exit;
+}
+sub help {
+  print "\nExtract the charges from off file.\n";
+  print "The following is an example, please refer to the manual for details.
+   Usage e.g.: offget_charge COU,atm1,0.6645,ln3,ln5,ln7 intra.off  \n\n";
+}
+
+
+$offchg=$ARGV[0];shift;
+$inputoff=$ARGV[0];
+
+@off=split(',',$offchg); 
+$keyword=$off[0];
+$atm=0;
+$atm=1 if lc($off[1]) eq "atm2";
+$chgdiv=$off[2];
+$pamcol=3;
+
+$getpot=$keyword;
+for ($n=3;$n<@off;$n++) { $getpot=$getpot.",".$off[$n]; }
+@total=`offget_inter $inputoff $getpot`;
+
+$idx=0;
+for ($j=0;$j<@total;$j++)
+{
+  $str=$total[$j];
+  print $str;
+  chomp($str); $str =~ s/^\s+|\s+$//g;
+  @ipot=split /\s+/,$str;
+  $atm1=$ipot[$atm];$atm2=$ipot[1];
+  $atm2=$ipot[0] if $atm == 1;
+  $chgprod=$ipot[$pamcol];
+  $chg=`getcharge  $chgprod $chgdiv`;chomp($chg);
+  print "$atm1    $atm2    $chgprod    $chgdiv    $chg \n";
+  $idx++;
+}
+
+print STDERR "Get [ $idx ] atom charges from [ $inputoff ] file.\n";

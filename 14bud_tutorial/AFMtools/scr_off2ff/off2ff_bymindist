@@ -1,0 +1,42 @@
+#!/usr/bin/perl
+
+$bnk="  ";
+$condition=$ARGV[0];$action=$ARGV[1];$offpam=$ARGV[2];$ffpam=$ARGV[3];
+$inputoff=$ARGV[4];$inpff=$ARGV[5];$outff=$ARGV[6];
+$tmpfile = "/tmp/tempoff2ff.$$"; $tmpfil2 = "/tmp/tempoff2f2.$$";
+system ("cp $inpff $tmpfile");
+
+#get potential from off file.
+@total=`offget_inter $inputoff $offpam`;
+
+#condition
+@cond=split(',',$condition); 
+$keyword=$cond[0]; 
+$operator=$cond[1];
+$val0=$cond[2];
+
+#ff parameter
+@ff=split(',',$ffpam); #maybe usefull afterwards.
+
+$buf=""; $idx=0;
+for ($ip=0;$ip<@total;$ip++) {
+  $str=$total[$ip];
+  chomp($str);
+  $str =~ s/^\s+|\s+$//g;
+  @ipot=split /\s+/,$str;
+  for ($k=0;$k<@ipot;$k++) { $dist=$ipot[$k+1] if $ipot[$k] eq "Min"; }
+  $rm=0;
+  $rm=1 if ( $operator eq "gt" and  $dist > $val0);
+  $rm=1 if ( $operator eq "lt" and  $dist < $val0);
+  $rm=1 if ( $operator eq "ge" and  $dist >= $val0);
+  $rm=1 if ( $operator eq "le" and  $dist <= $val0);
+  if ($rm) {
+    $nam1=$ipot[0];$nam2=$ipot[1];
+    $potential=$ff[0].",".$nam1.",".$nam2;
+    print $action."   ".$potential."\n";
+    system("ffaddremtermbynam  $action  $potential  $tmpfile > $tmpfil2; mv $tmpfil2 $tmpfile" );
+    $idx++;
+  }  
+}
+print  "$action [ $idx ] terms from $ff[0].\n";
+system ("mv $tmpfile $outff")

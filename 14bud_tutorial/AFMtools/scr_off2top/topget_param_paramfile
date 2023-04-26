@@ -1,0 +1,31 @@
+#!/usr/bin/perl
+#no molecule name is needed. Get parameter from files like bonded.itp, nonboned.itp.
+$bnk="    ";
+$section=$ARGV[0];shift;
+$pamln=$ARGV[0];shift;$pamcol=$ARGV[0];shift;
+$topfile=$ARGV[0];
+
+open (TOP,$topfile);
+while(<TOP>)
+{
+  $_ =~ s/^\s+//g;
+  if ((substr $_, 0, 1) eq ";") {next;}
+  if (/$section/i) {
+    for ($i=0;$i<$pamln;$i++) {
+      $_=<TOP>;
+      $_ =~ s/^\s+//g;
+      if ((substr $_, 0, 1) eq ";") {$i--; next; }
+      elsif ( /^\s*$|\[/ ) {die "No line number [ $pamln ] is found in [ $section ]!"} 
+      else { next unless ($i == $pamln -1); }
+    }
+    chomp;
+    @output=split;
+    $buf=$output[$pamcol-1];
+    print $buf."\n";
+    $find=1;
+    last; #exit the section loop
+  }
+} #end  loop
+
+die "No [$section] is found in [$topfile]!" unless $find==1;
+

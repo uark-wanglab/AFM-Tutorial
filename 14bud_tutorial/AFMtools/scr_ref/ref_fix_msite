@@ -1,0 +1,41 @@
+#!/usr/bin/perl
+if( $ARGV[0] eq '-h' || $ARGV[0] eq '-help')
+{
+help();
+exit;
+}
+sub help {
+    print "\nFix the forces and molecular name for the water M site in the ref file.\n";
+    print "Usage: ref_fix_msite  name_M  [file.ref] \n\n";
+}
+
+
+$msite=$ARGV[0];shift;
+$bnk="     ";
+
+$_=<>;print;
+$_=<>;print;
+
+$_=<>;print;
+($nam,$xxx,$yyy,$zzz, $frx, $fry, $frz,$solv,$molnam)=split;
+
+while(<>)
+{
+
+($nam)=split;
+
+if ($nam eq $msite) {
+chomp;
+$_ =~ s/\s+$//;
+$frx=0.0;$fry=0.0;$frz=0.0;
+print $_.$bnk.$frx.$bnk.$fry.$bnk.$frz.$bnk.$solv.$bnk.$molnam."\n";
+}
+else
+{ print;}
+
+($nam,$xxx,$yyy,$zzz, $frx, $fry, $frz,$solv,$molnam)=split;
+
+}
+
+
+

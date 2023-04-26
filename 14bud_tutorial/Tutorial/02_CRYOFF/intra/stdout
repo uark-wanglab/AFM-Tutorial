@@ -1,0 +1,158 @@
+ >>>>>>>>>>>>>>>>          CRYOFF           <<<<<<<<<<<<<<
+ >>>>>>>>>>>>>> CReate Your Own Force Field <<<<<<<<<<<<<<
+ >>>>>>>>>>>>>>>>    Group of Feng Wang     <<<<<<<<<<<<<<
+ >>>>>>>>>>>>>>>>        Jicun    Li        <<<<<<<<<<<<<<
+ >>>>>>>>>>>>>>>>        Zhonghua Ma        <<<<<<<<<<<<<<
+ >>>>>>>>>>>>>>>>        Ying     Yuan      <<<<<<<<<<<<<<
+ >>>>>>>>>>>>>>>>        Feng     Wang      <<<<<<<<<<<<<<
+ >>>>>>>>>>>>>>>>       Version 3.0.0         <<<<<<<<<<<<<<
+ 
+
+
+ >> Running in MPI Mode over           32  CPUs
+    Name of Input File:            intra.ff
+    Maximum number of parameters for each potential:              10
+    Maximum number of terms for Charge Constraints:           32 
+
+ >> Reading Input File
+    Name of Ref   File:           total.ref
+    Name of Output File:           intra.off
+    Number of Molecular Types:                    3 
+
+ >> Parsing System Options
+ reading keyword directives:
+ KEYWORDS   INTRA  NORM=W
+ Setting Condition number for SVD to   2.220446049250313E-012
+ The fit will be performed using frames,           1  to   1000000000 
+ in the .ref file
+ Weight scheme for the fitting is inverse RMSF.
+ The non-linear optimization will be performed using            1 
+  parallel processes.
+ Each process will use           32 CPUs for force evaluations.
+ The convergence is set to   0.000000000000000E+000
+ The maximum number of optimization steps is          100
+ Fitting atomic forces only (ignore net force and net torque)
+    >> Molecule Type           1 : BUUQM
+       No. of Atoms:                    18
+       No. of Intra-Pot Types:          18     Max of Groups:           4 
+
+       First Atom:           1       VDW: C1      COU: C1
+       Last  Atom:          18       VDW: TORQ      COU: TORQ
+
+       First Intra-Potential:   1 Type: 2 Function:  HAR  Group:   4
+                   Parameter:       1.000000000    1000.000000000
+       Last  Intra-Potential:  18 Type: 4 Function:  NCO  Group:   1
+                   Parameter:       1.000000000       3.000000000       0.000000000
+ 
+    >> Molecule Type           2 : H2OQM
+       No. of Atoms:                     6
+       No. of Virtual Sites:             1     No. of vec. that defines the vsit
+ e           3
+       No. of Intra-Pot Types:           2     Max of Groups:           2 
+
+       First Atom:           1       VDW: OW      COU: OW
+       Last  Atom:           6       VDW: TORQ      COU: TORQ
+
+       First Vsite:   1 Atom:   4
+           Virtual Site Combination Rule:   1 0.600000   2 0.200000   3 0.200000
+       Last  Vsite:   1 Atom:   4
+           Virtual Site Combination Rule:   1 0.600000   2 0.200000   3 0.200000
+ 
+       First Intra-Potential:   1 Type: 2 Function:  QUA  Group:   2
+                   Parameter:       0.951000000    1255.190000000   -4503.570000000    7020.310000000
+       Last  Intra-Potential:   2 Type: 3 Function:  HAR  Group:   1
+                   Parameter:       1.861882339      82.658000000
+ 
+    >> Molecule Type           3 : H2OMM
+       No. of Atoms:                     4
+       No. of Virtual Sites:             1     No. of vec. that defines the vsit
+ e           3
+       First Atom:           1       VDW: OMM      COU: OMM
+       Last  Atom:           4       VDW: MMM      COU: MMM
+
+       First Vsite:   1 Atom:   4
+           Virtual Site Combination Rule:   1 0.600000   2 0.200000   3 0.200000
+       Last  Vsite:   1 Atom:   4
+           Virtual Site Combination Rule:   1 0.600000   2 0.200000   3 0.200000
+ 
+ A total of ,          14  atom types read in for short range interactions.
+C1    H2    C2    H3    O1    H1    NETF  TORQ  OW    HW    
+M     OMM   HMM   MMM   
+ A total of ,          14  atom types read in for partial charges.
+C1    H2    C2    H3    O1    H1    NETF  TORQ  OW    HW    
+M     OMM   HMM   MMM   
+ 
+ >> Parsing Inter-Potential
+  Total Number of Inter-Molecular Interactions:           75
+  Out of which, the number of coulobmic interactions (counting THC) is 
+          49
+ Reading COU
+ Reading BUC
+ Reading STR
+ Reading EXP
+ Reading EXP
+ Reading SRD
+    First Inter-Potential:   1 Function:  COU Atom:     HW~HW
+                Parameter:       0.441560250
+    Last  Inter-Potential:  75 Function:  SRD Atom:     C2~OW
+                Parameter:    -995.004350000      -6.000000000       1.997000000
+ 
+ >> Parsing Charge Constraints
+    No. of Charge Constraints:          18
+              First Equation:   1  1 H1~HW +   2 H2~HW +   2 H3~HW +   1 C1~HW +   1 C2~HW +    1 O1~HW =  0.000  Weight:  1000.000
+              Last  Equation:  18  2 HW~MMM +    1 M~MMM =  0.000  Weight:  1000.000
+ 
+ >> Parsing Equivalent potentials
+    No. of Equivalent nonbonded potentials:           0
+ >> Optimization Setting
+    No. of Linear Parameters:               42
+    No. of Non-Linear Parameters:            0 
+
+ >> Reading Geometery and Reference Force
+    Total Frames Read            101
+    Total Atoms           89466   Max.  Atom/Frame         938
+    Total Ref. Mol.         634   Total Ref. Atom         5016
+                 |Atomic Force|       |Net Force|     |Torque|
+  Number                 3215               634               634
+    RMS               33.356613         10.619050         15.398188
+    Max.              98.952850         27.646222         83.655630
+    WRMS              33.356613         10.619050         15.398188
+
+ 
+
+ Estimated memory requirement for the head process in bytes: 
+              25026318
+ For MPI jobs, all the slaves combined needs about the same amount of the memory
+  as the head.
+ 
+
+   >> Frame:     1/101      Atom:        1  This Frame   924      Fit Mol.:     1  This Frame     6
+   >> Frame:     2/101      Atom:      925  This Frame   894      Fit Mol.:     7  This Frame     6
+   >> Frame:     3/101      Atom:     1819  This Frame   874      Fit Mol.:    13  This Frame     6
+   >> Frame:     4/101      Atom:     2693  This Frame   890      Fit Mol.:    19  This Frame     6
+   >> Frame:     5/101      Atom:     3583  This Frame   896      Fit Mol.:    25  This Frame     7
+   >> Frame:    96/101      Atom:    84173  This Frame   900      Fit Mol.:   598  This Frame     6
+   >> Frame:    97/101      Atom:    85073  This Frame   862      Fit Mol.:   604  This Frame     6
+   >> Frame:    98/101      Atom:    85935  This Frame   896      Fit Mol.:   610  This Frame     7
+   >> Frame:    99/101      Atom:    86831  This Frame   890      Fit Mol.:   617  This Frame     6
+   >> Frame:   100/101      Atom:    87721  This Frame   878      Fit Mol.:   623  This Frame     6
+   >> Frame:   101/101      Atom:    88599  This Frame   868      Fit Mol.:   629  This Frame     6
+  Finished Reading             101  frames
+ Walltime for reading the ref file:  0.606606000000000      seconds.
+ 
+ >> Beginning CRYOFF fitting ......
+    Linear Parameter Fitting
+Non-iterative Linear Optimization
+    MPI-ID=0 Calculating SVD Matrix for Frame           1
+    MPI-ID=0 Calculating SVD Matrix for Frame           2
+    MPI-ID=0 Calculating SVD Matrix for Frame           3
+    MPI-ID=0 Calculating SVD Matrix for Frame           4
+      MPI-ID=0 Total Wall Time(s) for Matrix Construction:        0.0
+
+ Warning: set OMP_NUM_THREADS to larger value to take advantage of parallel SVD 
+ library routine DGELSD
+      MPI-ID=0 Wall Time(s) for SVD:        0.0
+
+ 
+ >>>>>>>> CRYOFF Fitting Finished Successfully <<<<<<<<
+ 

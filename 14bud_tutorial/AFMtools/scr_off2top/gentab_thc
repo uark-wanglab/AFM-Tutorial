@@ -1,0 +1,24 @@
+#!/usr/bin/perl
+#unit nm, kj/mol
+$type=$ARGV[0];shift;$pam=$ARGV[0];shift;$rcut=$ARGV[0];shift;$delr=$ARGV[0];shift;$disp=$ARGV[0];shift;
+
+@param=split(/,/,$pam);
+$q1q2=$param[0];$a=$param[1];
+$FcovCou = 33.2063713741257*4.184;
+$scal=1;
+$scal=$disp if $disp != 0;
+$nbins=int($rcut/$delr)+1;  
+
+for($i=0;$i<=$nbins;$i++)
+{
+    $r=$delr*$i;
+    if ($r==0.0) {$h=0.0;$hprime=0.0;}
+
+    else { 
+      $Rtmp=$a*$r**3;
+      $igamma=`igamma  $Rtmp`;
+      $h = $FcovCou*$q1q2/$r*(-exp(-$Rtmp)+$a**(1.0/3.0)*$igamma);
+      $hprime=$FcovCou*$q1q2/$r**2*(-exp(-$Rtmp));
+    }
+    printf("%20.8e %20.8e %20.8e %20.8e %20.8e %20.8e %20.8e\n", $r,0.0,0.0,0.0,0.0,$h,$hprime);
+}

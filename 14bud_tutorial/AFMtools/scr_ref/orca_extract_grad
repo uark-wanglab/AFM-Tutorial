@@ -1,0 +1,31 @@
+#!/usr/bin/perl
+$bnk="";
+if( $ARGV[0] eq '-h' || $ARGV[0] eq '-help')
+{
+help();
+exit;
+}
+sub help {
+    print "\n Extract gradients from a ORCA .engrad file.\n";
+    print "Usage: orca_extract_grad name.engrad\n\n";
+}
+
+do ($_=<>) until ($.>2);  # skip the header
+$natms=<>; chomp($natms);
+do ($_=<>) until ($.>10); #skip the header  
+
+while(<>) {
+chomp;
+$gx=$_; 
+$_=<>; chomp; $gy=$_;
+$_=<>; chomp; $gz=$_;
+print $gx.$bnk.$gy.$bnk.$gz."\n";
+$natms--;
+last if $natms==0;
+}
+
+
+
+
+
+

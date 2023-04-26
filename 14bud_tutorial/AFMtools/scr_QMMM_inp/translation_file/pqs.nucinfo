@@ -1,0 +1,30 @@
+#coment lines start with "#", can exist in any place and not a must.
+#This is a name translation file.
+#This file is optional, if do not want to use it, plead use /dev/null in command line. 
+#The first column is the atom name in pxyz file. 
+#The second column is the atom name  in pqs xyz file. 
+#The QMname can be appended by a spctical character.  Allowed character:!@#$%^&*+=<>?.
+#
+#Name     QMname       
+#
+H4          H@        
+H14         H@          
+H24         H@          
+H34         H@          
+HB14        H@          
+HB24        H@          
+HB34        H@          
+HA4         H@          
+C4          C@          
+CA4         C@          
+CB4         C@          
+N4          N@          
+O4          O@          
+OC14        O@          
+OC24        O&          
+OW3         O&          
+HW13        H&          
+HW23        H&          
+OW2         O          
+HW12        H          
+HW22        H          

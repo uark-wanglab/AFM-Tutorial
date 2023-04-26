@@ -1,0 +1,30 @@
+#!/usr/bin/perl
+$index=0;
+$xind=0;
+$filename=$ARGV[0];
+$xind=$ARGV[1]-1;
+$nfigures=@ARGV-2;
+shift();shift();
+open(INPUT,$filename) || die "can not open file $filename\n";
+die "plotxy filename xcol ycol [ycol] ...\n" if ($nfigures < 1); 
+
+foreach $ncol (@ARGV)
+{
+print STDERR ("plotting column $ncol of $filename.\n");
+$tmpname="/tmp/grace.$$.$ncol";
+$allnames=$allnames.$tmpname." ";
+open(GRACE,"> $tmpname");
+$index=0;
+while(<INPUT>)
+{
+   chomp();
+   $index=(split())[$xind];
+   $data=(split())[$ncol-1];
+   print GRACE $index,"   ",$data,"\n";
+#   print $index,"   ",$data,"\n";
+}
+close GRACE;
+seek(INPUT,0,0);
+}
+system ("xmgrace -maxpath 999999 $allnames");
+system ("rm $allnames");

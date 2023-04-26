@@ -1,0 +1,81 @@
+#!/usr/bin/perl
+#This routine  mark up the next nearest molecule of an atom range [ido ide] to a value val.
+if( $ARGV[0] eq '-h' || $ARGV[0] eq '-help')
+{
+help();
+exit;
+}
+sub help {
+  print "\nMark up the next nearest molecule to a range of atoms. The molecule will be marked if its mark is smaller than 'mark_val'. \n";
+  print "Usage: mark_nextnearest  atom_id_start  atom_id_end  mark_val  [file.pxyz]\n\n";
+}
+
+
+$bnk="   ";
+
+$ido=$ARGV[0];shift; #This should be the id of first atom to be searched 
+$ide=$ARGV[0];shift; #This is the id of the last atom to be searched
+$val=$ARGV[0];shift;
+
+$natm=<>;chomp($natm);
+$_=<>;@pbc=split;
+($box1,$box2,$box3)=split;
+die "only orthorhombic box supported.\n" if @pbc>3;
+
+#read positions
+for ($i=0;$i<$natm;$i++)
+{
+$_=<>;
+($nam[$i],$xxx[$i],$yyy[$i],$zzz[$i],$mol[$i],$mar[$i])=split;
+}
+
+#loop on every atoms in the selected molecule
+$mark=0;$find=0;$rnearst2=0.0;
+
+for ($ido=$ido-1;$ido<$ide;$ido++)
+{
+  #print STDERR "search from atom $ido.\n";
+  $xo=$xxx[$ido];$yo=$yyy[$ido];$zo=$zzz[$ido];
+  #print STDERR "origin location:  $xo  $yo  $zo\n";
+  
+  for ($i=0;$i<$natm;$i++)
+  {
+   # calculate the distance only when the atom's mark is smaller than $val
+    if ( $mar[$i] < $val ) { 
+      $find=$find+1;
+      $dx=abs($xxx[$i]-$xo); $dx=$box1-$dx if $dx>$box1/2;
+      $dy=abs($yyy[$i]-$yo); $dy=$box2-$dy if $dy>$box2/2;
+      $dz=abs($zzz[$i]-$zo); $dz=$box3-$dz if $dz>$box3/2;
+      $dis2=$dx*$dx+$dy*$dy+$dz*$dz;
+      if ($find==1) { 
+        $rnearst2=$dis2;
+  	$mark=$mol[$i];
+      }else{
+  	if ($dis2 < $rnearst2) 
+        {
+  	  $rnearst2=$dis2;
+  	  $mark=$mol[$i];
+  	}
+      }
+    }
+   }
+}
+#end main for loop 
+
+#mark the molecule with the name $mark
+for ($i=0;$i<$natm;$i++)
+{
+    if ( $mol[$i] eq $mark ) {
+      print STDERR "$mark $nam[$i] \n"; # $xxx[$i] $yyy[$i] $zzz[$i] \n"; 
+      $mar[$i]=$val;
+     }
+}
+
+#output starts here
+print $natm."\n";
+print $box1.$bnk.$box2.$bnk.$box3."\n";
+for ($i=0;$i<$natm;$i++)
+{
+print $nam[$i].$bnk.$xxx[$i].$bnk.$yyy[$i].$bnk.$zzz[$i].$bnk.$mol[$i].$bnk.$bnk.$mar[$i]."\n";
+}
+

@@ -1,0 +1,21 @@
+[ defaults ]
+; nbfunc        comb-rule       gen-pairs       fudgeLJ fudgeQQ
+1               1               no               0.0     0.0
+
+; Include nonbonded
+#include "nonbonded.itp"
+
+;Include BUU
+#include "BUU.itp"
+
+; Include water topology
+#include "BLYPSP_4F.itp"
+
+[ system ]
+; Name
+BUU in water
+
+[ molecules ]
+; Compound        #mols
+BUU              1
+SOL              343

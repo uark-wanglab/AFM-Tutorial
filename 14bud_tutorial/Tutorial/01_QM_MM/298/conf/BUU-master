@@ -1,0 +1,48 @@
+#!/usr/bin/perl
+
+#mark values
+$valBUU=4;  #BUU
+$valup=3;   #solvation factor 1 water
+$valqm=2;  #solvation factor 0 water
+$valmm=1;    #MM water
+
+
+$rcudio=3.0; #cut off for DIO
+$rcuboundary=2.6; #cutoff for boundary
+$rcumm=9.0; #cutoff for MM
+
+foreach $file (@ARGV)
+{
+$basename=substr $file,0,-4;
+@base_path=split(/\//, $basename);
+$filename=@base_path[@base_path-1].".pxyz";
+$xyzname=@base_path[@base_path-1].".xyz";
+
+#gro to pxyz
+$cmd1="gro2pxyz $file|mark_byname BUU $valBUU > $filename";
+
+#mark DIO and water aroud DIO
+$cmd2="mark_within_range 1 16 $rcudio $valqm $filename";
+
+#randomly mark up five  water and their boundary
+$cmd3="markup_random $valqm $valup $filename|markup_random 2 3|markup_random 2 3 |markup_random 2 3 |markup_random 2 3 > $filename._$$; mv $filename._$$ $filename";
+$cmd4="mark_boundary $rcuboundary $valup $valqm $filename";
+
+#change mark 2 waters to mark 3 waters if they are surrounded by waters with a mark greater than or equal to 2
+$cmd5="markup_mol $rcuboundary  $valqm  $valup $filename > $filename._$$; mv $filename._$$ $filename";
+
+#mark mm
+$cmd6="mark_within_range 1 16 $rcumm $valmm $filename";
+
+#dropoff and sort
+$cmd7="pxyz_dropoff 0 $filename | pxyz_sort > $filename._$$; mv $filename._$$ $filename";
+$cmd8="pxyz_2vxyz $filename > $xyzname";
+
+#execute
+system("$cmd1");
+system("$cmd2");system("$cmd3");
+system("$cmd4");system("$cmd5");
+system("$cmd6");system("$cmd7");
+system("$cmd8");
+}
+

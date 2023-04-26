@@ -1,0 +1,49 @@
+#!/usr/bin/perl
+if( $ARGV[0] eq '-h' || $ARGV[0] eq '-help')
+{
+help();
+exit;
+}
+sub help {
+  print "\nAdd the gromacs forces to the ref file.\n";
+  print "The format for force file should look like:
+    f[    0]={-4.57260e+02, -2.77023e+02,  1.15747e+03}
+    f[    1]={ 1.36283e+03, -1.41065e+01, -1.30921e+03}
+    f[    2]={ 4.42350e+02, -6.83688e+01,  6.43386e+02}\n";
+  print "Usage: ref_upd_gmx_frc  gromacs_frc  [file.ref] \n\n";
+}
+
+
+$conv=1.0/41.84;
+$bnk="     ";
+
+open(GMX,"$ARGV[0]") || die "can not open $ARGV[0]\n";
+shift;
+
+$i=0;
+while(<GMX>){
+($tmp,$fxx[$i],$fyy[$i],$fzz[$i]) = split(/[{,}]/);
+#print "debug: $fxx[$i] $fyy[$i] $fzz[$i]\n";
+$i++;
+}
+
+$_=<>;print;
+$_=<>;print;
+$i=0;
+while(<>)
+{
+($nam,$xxx,$yyy,$zzz, $frx, $fry, $frz, $solv, $molnam)=split;
+unless (($nam eq "NetF") | ($nam eq "Torq")){
+
+print $nam.$bnk.$xxx.$bnk.$yyy.$bnk.$zzz.$bnk;
+printf "%15.9f$bnk%15.9f$bnk%15.9f",$frx+$fxx[$i]*$conv,$fry+$fyy[$i]*$conv,$frz+$fzz[$i]*$conv;
+print $bnk.$solv.$bnk.$molind.$molnam."\n";
+
+$i++;
+}
+else { print;}
+
+}
+
+
+

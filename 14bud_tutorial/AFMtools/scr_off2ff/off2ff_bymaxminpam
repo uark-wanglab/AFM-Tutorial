@@ -1,0 +1,43 @@
+#!/usr/bin/perl
+$condition=$ARGV[0];$action=$ARGV[1];$offpam=$ARGV[2];$ffpam=$ARGV[3];
+$inputoff=$ARGV[4];$inpff=$ARGV[5];$outff=$ARGV[6];
+$tmpfile = "/tmp/tempoff2ff.$$"; $tmpfil2 = "/tmp/tempoff2f2.$$";
+system ("cp $inpff $tmpfile");
+die "script will not overwrite existing output\n" if (-e $outff);
+
+#off parameter
+@off=split(',',$offpam);
+$getpot=$off[0];
+$pamcol=substr $off[1],3;
+for ($n=2;$n<@off;$n++){ $getpot=$getpot.",".$off[$n]; }
+@total=`offget_inter $inputoff $getpot`;
+
+#condition
+@cond=split(',',$condition); #parameter postion in off file
+$keyword=$cond[0];
+$operator=$cond[1];
+$val0=$cond[2];
+
+#ff parameter
+@ff=split(',',$ffpam);
+
+$min=1000000000000;$max=-1000000000000;
+for ($ip=0;$ip<@total;$ip++){
+  $str=$total[$ip];
+  chomp($str);
+  $str =~ s/^\s+|\s+$//g;
+  @ipot=split /\s+/,$str;
+  $pam=$ipot[$pamcol-1]; 
+  if ($keyword eq "max") {
+    if ($pam > $max) { $max=$pam; $nam1=$ipot[0];$nam2=$ipot[1];$val=$max; }
+  } elsif ($keyword eq "min")  {
+    if ($pam < $min) { $min=$pam; $nam1=$ipot[0];$nam2=$ipot[1];$val=$min; }
+  } else { 
+    die "No rule for ".$keyword." !\n";
+  }
+}
+      
+$potential=$ff[0].",".$nam1.",".$nam2;
+print $action."   ".$potential."  parameter: ".$val."\n";
+system("ffaddremtermbynam  $action  $potential  $tmpfile > $tmpfil2; mv $tmpfil2 $tmpfile" );
+system ("mv $tmpfile $outff");

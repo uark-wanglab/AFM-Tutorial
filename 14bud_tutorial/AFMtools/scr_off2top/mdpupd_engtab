@@ -1,0 +1,20 @@
+#!/usr/bin/perl
+$tablist=$ARGV[0];shift;
+open(TAB,$tablist);
+while(<TAB>){
+chomp;
+$list=$_;
+}
+
+print STDERR "Will add the pair list in $tablist into mdp file energygrp_table keyword!\n";
+
+while(<>)
+{
+if (/energygrp_table/i)
+{
+chomp;
+$val=$_." ".$list;
+print "$val \n";
+}
+else {print;}
+}

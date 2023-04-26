@@ -1,0 +1,14 @@
+######molecule definition#####################
+#                       chgpam/offpam                                                                   toppam               unitcov       control
+mol.charge file=chgfile BUU,atoms,col7,ln1-16   1   default
+
+#                 offpam                       toppam                             unitcov               #control
+mol.bonded          BUUQM,col4,ln1-6         BUU,bonds,col4,ln1-15                  1.0               type,molinfo
+mol.bonded          BUUQM,col5,ln1-6         BUU,bonds,col5,ln1-15                  1.0               type,molinfo
+#
+mol.bonded          BUUQM,col4,ln7-15        BUU,angles,col5,ln1-26                 1.0               type,molinfo
+mol.bonded          BUUQM,col5,ln7-15        BUU,angles,col6,ln1-26                 1.0               type,molinfo  
+##
+mol.bonded          BUUQM,col4,ln16-18       BUU,dihedrals,col6,ln1-5               1.0               type,molinfo
+mol.bonded          BUUQM,col5,ln16-18       BUU,dihedrals,col7,ln1-5               1.0               type,molinfo
+mol.bonded          BUUQM,col6,ln16-18       BUU,dihedrals,col8,ln1-5               1.0               type,molinfo

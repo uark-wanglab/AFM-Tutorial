@@ -1,0 +1,26 @@
+#!/usr/bin/perl
+# This routine mark within molecules according atom list.
+
+if( $ARGV[0] eq '-h' || $ARGV[0] eq '-help')
+{
+help();
+exit;
+}
+sub help {
+  print "\nMark up molecules within ‘rcut’ of a list of atoms. The mark value is mark_val.\n";
+  print "The input pxyz file will be changed\n";
+  print "Usage: mark_within_list rcut mark_val file.pxyz atom_id1 atom_id2 atom_id3 ...\n\n";
+}
+
+
+$rcu=$ARGV[0];shift; #cutoff
+$val=$ARGV[0];shift; #mark value
+$filename=$ARGV[0];shift;
+
+foreach $i (@ARGV) 
+{
+die "please supply atom list\n" unless ( $i eq $i+0);
+$cmd="mark_within $i $rcu $val $filename > $filename._$$; mv $filename._$$ $filename";
+#print $cmd."\n";
+system("$cmd");
+}

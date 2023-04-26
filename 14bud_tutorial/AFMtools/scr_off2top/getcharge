@@ -1,0 +1,14 @@
+#!/usr/bin/perl
+$chgprod=$ARGV[0];
+$chgdivid=$ARGV[1];
+die "maximum 2 parameters.\n" if @ARGV > 2;
+
+$charge=sqrt($chgprod) if $ARGV[1] eq 'sqrtp';
+$charge=-sqrt($chgprod) if $ARGV[1] eq 'sqrtn';
+
+$charge=$chgprod/$chgdivid if $ARGV[1] =~ /^-?\d+(\.\d+)?$/;
+
+die "the second input must be 'sqrt[pn]' or a number." unless ($ARGV[1] =~ /sqrt(n|p)/ or $ARGV[1] =~ /^-?\d+(\.\d+)?$/);
+
+#printf("%.8f\n",$charge);
+print $charge."\n";

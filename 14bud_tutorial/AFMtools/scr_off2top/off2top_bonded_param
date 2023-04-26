@@ -1,0 +1,86 @@
+#!/usr/bin/perl
+#update parameters in [bondtypes], [angletypes], [dihedraltypes]
+#
+$offpam=$ARGV[0];$toppam=$ARGV[1];$unitcov=$ARGV[2];$pattern=$ARGV[3];
+$inputoff=$ARGV[4];$inptop = $ARGV[5]; $outtop = $ARGV[6];
+$tmpfile = "/tmp/temptop.$$"; $tmpfil2 = "/tmp/temptop2.$$";
+system ("cp $inptop $tmpfile");
+die "script will not overwrite existing output\n" if (-e $outtop);
+
+#get potential from off file.
+@off=split(',',$offpam);
+$keyword=$off[0]; $offcol=substr $off[1],3;
+$getpot=$keyword;
+for ($n=2;$n<@off;$n++) { $getpot=$getpot.",".$off[$n]; }
+@total=`offget_intra $inputoff $getpot`;
+
+#transfer atoms types between gromacs and cryoff
+if ($pattern =~ /type/i) {
+  $ind1=index($pattern,"type");
+  $typecov=1;
+  $pat1=substr $pattern,$ind1; $pat1 =~ s/,|=/ /g; @file=split /\s+/,$pat1;
+  open (PATF,$file[1]);
+  while(<PATF>) { chomp; ($typ1,$typ2)=split; $typ{$typ1}=$typ2; }
+  print "Atom types are defined from [ $file[1] ] file.\n";
+} else {print "Atom types are defined from [ $inputoff ] file.\n";}
+
+if ($pattern =~ /ext/i) {
+  $ind2=index($pattern,"ext");
+  $extra=1;
+  $pat2=substr $pattern,$ind2; $pat2 =~ s/,|=|:/ /g; @val=split /\s+/,$pat2;
+  $offcol2=substr $val[1],3; $topcol2=substr $val[2],3;
+}
+
+
+# parameter position in top file
+@top=split(',',$toppam);
+$section=$top[0]; $pamcol=substr $top[1],3; 
+$idx=0;
+for ($n=2;$n<@top;$n++) {
+  $top[$n]= substr $top[$n],2; @templn=split(/-/,$top[$n]);
+  $templn[1]=$templn[0] unless $templn[1] > $templn[0];
+  for ($j=$templn[0];$j<=$templn[1];$j++){ $ln[$idx]=$j; $idx++;"\n";}
+}
+
+#update top file.
+$nterm=$idx;$idx=0;
+for ($i=0;$i<$nterm;$i++) {
+  $pamln=$ln[$i];
+  $temp1=`topget_param_paramfile  $section $pamln 1  $inptop`;chomp($nam1=$temp1);$nam1=uc($typ{$nam1}) if $typecov == 1;#1st 
+  $temp2=`topget_param_paramfile  $section $pamln 2  $inptop`;chomp($nam2=$temp2);$nam2=uc($typ{$nam2}) if $typecov == 1;#2nd 
+  $temp3=`topget_param_paramfile  $section $pamln 3  $inptop`;chomp($nam3=$temp3);$nam3=uc($typ{$nam3}) if $typecov == 1;
+  $temp4=`topget_param_paramfile  $section $pamln 4  $inptop`;chomp($nam4=$temp4);$nam4=uc($typ{$nam4}) if $typecov == 1;
+  $case1=$nam1."_".$nam2; $case2=$nam2."_".$nam1; 
+  if ($section =~ /ang/i) { $case1=$nam1."_".$nam2."_".$nam3; $case2=$nam3."_".$nam2."_".$nam1; }
+  if ($section =~ /dih/i) { $case1=$nam1."_".$nam2."_".$nam3."_".$nam4; $case2=$nam4."_".$nam3."_".$nam2."_".$nam1; }
+  if ($extra) { $toppam=`topget_param_paramfile $section $pamln $topcol2 $inptop`; chomp($toppam); }
+
+  for ($j=0;$j<@total;$j++) {
+    $str=$total[$j]; chomp($str); $str =~ s/^\s+|\s+$//g; @temp=split /\s+/,$str;
+    if ( $case1 eq  $temp[1] or $case2 eq $temp[1] ) { 
+      $update=1;
+      if ($extra) { $update=0 unless $temp[$offcol2-1]==$toppam;}
+    }
+
+    if ($update) {
+     # print "Here1\n";
+      $pam=$temp[$offcol-1];
+      if ( $section =~ /bond/i and $pamcol==4 ) { 
+        $pam=sprintf("%.4f",$pam); #bonds
+      } elsif ( $section =~ /ang/i and $pamcol==5 or $section =~ /dih/i and $pamcol==6) {
+        $pam=sprintf("%.3f",$pam); #angles
+      } else {
+        $pam=sprintf("%.3f",$pam/4.184);
+        $pam=$pam*4.184; } #force constants
+      $pam=$pam*$unitcov;
+      print "$nam1  $nam2  $pam \n" if ($section =~ /bond/i);
+      print "$nam1  $nam2  $nam3  $pam \n" if ($section =~ /ang/i);
+      print "$nam1  $nam2  $nam3  $nam4  $pam \n" if ($section =~ /dih/i);
+      system("topupd_paramfile $section $pamln $pamcol $pam $tmpfile > $tmpfil2; mv $tmpfil2 $tmpfile");
+      $idx++;$update=0;
+     # print "Here2\n";
+    }
+  }
+}
+print "Update [ $idx  ] parameters for [ $section ].\n";
+system ("mv $tmpfile $outtop");

@@ -1,0 +1,32 @@
+#!/usr/bin/perl
+# This routine mark atoms if the molecule name contains the string $nam
+
+if( $ARGV[0] eq '-h' || $ARGV[0] eq '-help')
+{
+help();
+exit;
+}
+sub help { 
+  print "\nMark molecules with a name contains the string 'targetname'.\n";
+  print "Usage: mark_byname targetname mark_val [file.pxyz]\n\n";
+}
+
+ 
+$bnk="   ";
+
+$nam=$ARGV[0];shift;
+$val=$ARGV[0];shift;
+
+$natm=<>;chomp($natm);
+print $natm."\n";
+$_=<>;
+print $_;
+
+for ($i=0;$i<$natm;$i++)
+{
+$_=<>;
+($nam[$i],$xxx[$i],$yyy[$i],$zzz[$i],$mol[$i],$mar[$i])=split;
+if ($mol[$i] =~ /$nam/i ) {$mar[$i]=$val;}
+print $nam[$i].$bnk.$xxx[$i].$bnk.$yyy[$i].$bnk.$zzz[$i].$bnk.$mol[$i].$bnk.$mar[$i]."\n";
+}
+

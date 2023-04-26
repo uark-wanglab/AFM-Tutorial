@@ -1,0 +1,53 @@
+#!/usr/bin/perl
+#This routine updates the geometry section in gaussian input file.
+
+if( $ARGV[0] eq '-h' || $ARGV[0] eq '-help')
+{
+help();
+exit;
+}
+sub help {
+  print "\nUpdate the geometry section of the Gaussian input file from a pxyz or xyz file.\n";
+  print "A key word 'GEOMETRY' is needed as the start of the geometry section.\n";
+  print "Please find an example name_translation file in the manual or translation_file directory.\n";
+  print "Usage: pxyz_gaussian_upd_geom  gaussian.inp  name_translation  [file.pxyz] \n\n";
+}
+
+
+
+$templ=$ARGV[0];shift; #This is Gaussian input file
+$nametrans=$ARGV[0];shift; #This is name translation information
+
+die "ERROR: Molpro template file: $templ expected!\n" unless -e $templ;
+die "ERROR: NameTranslation file: $nametrans expected!\n" unless -e $nametrans;
+$shlwarn=0;
+
+open (nameinfo,"<", $nametrans);
+while (<nameinfo>){
+chomp;
+if ((substr $_, 0, 1) eq "#") {next;}
+($name,$QMnam)=split;
+$trans{$name} = $QMnam;
+}
+
+
+open (GAU,"<", $templ); 
+while (<GAU>) {
+ unless (/GEOMETRY/i) {print ;}
+ else {
+   $_=<>;chomp;$natms=$_;
+   $_=<>;
+   for($i=0;$i<$natms;$i++){
+     $_=<>; chomp; ($nam,$xxx,$yyy,$zzz,$mol,$mar)=split;
+     if ( $trans{$nam} ){
+     $tmpname=$trans{$nam} }
+     else {$tmpname = $nam;$shlwarn=1};
+     print "$tmpname   $xxx   $yyy   $zzz\n";
+   }
+   do {$_=<GAU>} until ( $_ =~ /^\s*$/);
+   print $_;
+ }
+} 
+
+print STDERR "Warning: At least one atom name is not in the NameTranslation file.\n" if ($shlwarn);
+

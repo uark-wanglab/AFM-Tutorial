@@ -1,0 +1,20 @@
+#!/usr/bin/perl
+foreach $file (@ARGV) {
+print $file."\n";
+@headlines=`head -n 20 $file` ;
+for ($n=0;$n<@headlines;$n++) {
+$_=$headlines[$n];
+($r,$f,$fp,$g,$gp,$h,$hp)=split;
+if($f==0) {print "    COU maybe problematic!\n" if $fp != 0.0;}
+elsif($f!=0) {print "    COU maybe problematic!\n" if $fp == 0.0;}
+
+
+if($g==0) {print "    Disp maybe problematic!\n" if $gp != 0.0;}
+elsif($g!=0) {print "    Disp maybe problematic!\n" if $gp == 0.0;}
+
+if($h==0) {print "    Repulsion maybe problematic!\n" if $hp != 0.0;}
+if($h!=0) {print "    Repulsion maybe problematic!\n" if $hp == 0.0;}
+
+}
+
+}

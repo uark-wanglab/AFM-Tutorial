@@ -1,0 +1,49 @@
+#!/usr/bin/perl
+if( $ARGV[0] eq '-h' || $ARGV[0] eq '-help')
+{
+help();
+exit;
+}
+sub help { print "\nUsage: pxyz_2gro  [file.pxyz] \n\n";
+}
+
+
+
+$bnk="  ";
+$_=<>;chomp;$natm=$_;
+
+$_=<>;
+($box1,$box2,$box3)=split;
+$box1=$box1*0.1;
+$box2=$box2*0.1;
+$box3=$box3*0.1;
+
+for ($i=0;$i<$natm;$i++)
+{
+$_=<>;
+($nam[$i],$xxx[$i],$yyy[$i],$zzz[$i],$mol[$i],$val[$i])=split;
+}
+
+print "system\n";
+print $natm."\n";
+
+$molname=$mol[0];
+$nmol=1;
+$molname =~ /[^0-9]/;
+$cont=$`;
+$groname=substr $molname,length($cont);
+
+for ($i=0;$i<$natm;$i++)
+{
+  $idx++;
+  if ($mol[$i] ne $molname) {
+    $molname=$mol[$i];
+    $nmol++;
+    $molname =~  /[^0-9]/;
+    $cont=$`;
+    $groname=substr $molname,length($cont);
+  }
+  printf ("%5d%-5s%5s%5d%8.3f%8.3f%8.3f\n", $nmol,$groname,$nam[$i],$idx,$xxx[$i]*0.1,$yyy[$i]*0.1,$zzz[$i]*0.1);
+}
+
+print $box1.$bnk.$box2.$bnk.$box3."\n";

@@ -1,0 +1,27 @@
+#!/usr/bin/perl
+#This routine mark up n nearest molecules of the atom range [$ido $ide
+if( $ARGV[0] eq '-h' || $ARGV[0] eq '-help')
+{
+help();
+exit;
+}
+sub help {
+  print "\nMark up next N nearest molecules to a range of atoms. The molecule will be marked if its mark is smaller than 'mark_val'. \n";
+  print "The input pxyz file will be changed.\n";
+  print "Usage: mark_nextnearest_n  atom_id_start  atom_id_end  N  mark_val  file.pxyz\n\n";
+}
+
+
+$ido=$ARGV[0];shift; #This is the first atom id of the seleted molecule
+$ide=$ARGV[0];shift; #Last atom id of the selected molecule
+$nmark=$ARGV[0];shift; #Number of Molecules to be Marked. 
+$val=$ARGV[0];shift; #mark value
+$filename=$ARGV[0];
+
+for ($i=0;$i<$nmark;$i++)
+{
+$cmd="mark_nextnearest $ido $ide $val $filename > $filename._$$; mv $filename._$$ $filename";
+print "mark_nextnearest $ido $ide $val $filename\n";
+#print $cmd."\n";
+system("$cmd");
+}

@@ -1,0 +1,23 @@
+#!/usr/bin/perl
+#unit nm, kj/mol
+$type=$ARGV[0];shift;$pam=$ARGV[0];shift;$rcut=$ARGV[0];shift;$delr=$ARGV[0];shift;$rzero=$ARGV[0];
+
+@param=split(/,/,$pam);
+$q1q2=$param[0]; die "One parameter is needed, but @param were passed into the script!" if @param !=1;
+$FcovCou = 33.2063713741257*4.184;
+
+if ($type eq "COUgmx") { $q1q2=1; $FcovCou=1;}
+
+$nbins=int($rcut/$delr)+1;  
+
+for($i=0;$i<=$nbins;$i++)
+{
+    $r=$delr*$i;
+    if ($i<=10) { $h=0.0;$hprime=0.0; }
+    elsif ($r > $rzero) { $h=0.0;$hprime=0.0; }
+    else { 
+      $h = $FcovCou*$q1q2/$r;
+      $hprime=$FcovCou*$q1q2/$r**2;
+    }
+    printf("%20.8e %20.8e %20.8e %20.8e %20.8e %20.8e %20.8e\n",$r,0.0,0.0,0.0,0.0,$h,$hprime);
+}

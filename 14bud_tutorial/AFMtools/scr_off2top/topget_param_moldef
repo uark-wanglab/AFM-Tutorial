@@ -1,0 +1,52 @@
+#!/usr/bin/perl
+$bnk="    ";
+$molecule=$ARGV[0];shift;$section=$ARGV[0];shift;
+$pamln=$ARGV[0];shift;$pamcol=$ARGV[0];shift;
+$topfile=$ARGV[0];
+
+open (TOP,$topfile);
+while(<TOP>)
+{
+  $_ =~ s/^\s+//g;
+  if ((substr $_, 0, 1) eq ";") {next;}
+
+  if (/moleculetype/) { #find a molecule type
+    while(<TOP>) {
+      $_ =~ s/^\s+//g;
+      if ((substr $_, 0, 1) eq ";") {next;}
+      chomp;
+      ($mol,$nrexc)=split;
+
+      if ($mol =~ /$molecule/i) { #match the molecule tyep
+        while(<TOP>) {
+          $_ =~ s/^\s+//g;
+          if ((substr $_, 0, 1) eq ";") {next;}
+
+          if (/$section/) {
+            for ($i=0;$i<$pamln;$i++) {
+              $_=<TOP>;
+              $_ =~ s/^\s+//g;
+              if ((substr $_, 0, 1) eq ";") {$i--; next; }
+           # how to tell the end of the file and give err message.? Sep 26 2019
+            #  elsif ( /^\s*$/ ) {die "No line number [ $pamln ] is found in $molecule.[ $section ] !"}
+              elsif ((substr $_, 0, 1) eq "\[") {die "No line number [ $pamln ] is found in $molecule.[ $section ] !"}
+             # elsif ( /^\s*$|\[/ ) {die "No line number [ $pamln ] is found in $molecule.[ $section ] !"} 
+              else { next unless ($i == $pamln -1); }
+            }
+            chomp;
+            @output=split;
+            $buf=$output[$pamcol-1];
+            print $buf."\n";
+            last; #exit the section loop
+          } else {
+            die "No $section is found in $molecule !" if /moleculetype/;
+          }
+
+        }
+      } 
+      else { last; } #exit the molecule loop 
+   } 
+
+  }
+
+} #end  loop

@@ -1,0 +1,38 @@
+#!/bin/bash
+#SBATCH -J BUU_gr
+##SBATCH --partition=pubcondo06
+#SBATCH --partition=condo
+##SBATCH --partition=cloud72
+##SBATCH  --partition=comp01
+##SBATCH --constraint=fwang
+#SBATCH --constraint=0gpu&192gb&nvme
+#SBATCH --qos=condo
+#SBATCH --nodes=1
+#SBATCH --tasks-per-node=32
+#SBATCH --time=02:00:00
+#SBATCH --mail-type=ALL
+##SBATCH --mail-user=
+##SBATCH -w c1308
+##SBATCH -x, --exclude=c[1311-1320]
+#SBATCH --exclusive
+
+
+module purge
+module load gcc/11.2.1 openmpi/4.1.4
+source /home/rjweldon/Software/Orca/setenv.orca
+
+scrdir=/local_scratch/$SLURM_JOB_ID
+cd $SLURM_SUBMIT_DIR
+cp -a * $scrdir
+cd $scrdir
+
+NP=$SLURM_NPROCS
+
+/home/rjweldon/Software/Orca/bin/orca $1 2> error.txt 1> output.txt
+
+
+cd $scrdir
+
+cp -a * $SLURM_SUBMIT_DIR
+
+cd $scrdir && rm -r *

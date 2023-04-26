@@ -1,0 +1,38 @@
+#!/usr/bin/perl
+$tab1=$ARGV[0];shift;$tab2=$ARGV[0];shift;
+
+$cou1=1;$cou2=1;
+$disp1=1;$disp2=1;
+$rep1=1;$rep2=1;
+foreach $scal (@ARGV)
+{
+ if ($scal =~ /cou/i){
+ ($text,$cou1,$cou2)=split(/,/,$scal);
+ }
+ if ($scal =~ /disp/i){
+ ($text,$disp1,$disp2)=split(/,/,$scal);
+ }
+ if ($scal =~ /rep/i){
+ ($text,$rep1,$rep2)=split(/,/,$scal);
+ }
+}
+
+open (TAB1,$tab1);
+open (TAB2,$tab2);
+
+while (<TAB1>) {
+  chomp;
+  ($r1,$f1,$fprime1,$g1,$gprime1,$h1,$hprime1)=split;
+  $_=<TAB2>;chomp;
+  ($r2,$f2,$fprime2,$g2,$gprime2,$h2,$hprime2)=split;
+  
+  if ($r1 == $r2) {
+    $r=$r1;
+    $f=$f1*$cou1+$f2*$cou2;$fprime=$fprime1*$cou1+$fprime2*$cou2;
+    $g=$g1*$disp1+$g2*$disp2;$gprime=$gprime1*$disp1+$gprime2*$disp2;
+    $h=$h1*$rep1+$h2*$rep2;$hprime=$hprime1*$rep1+$hprime2*$rep2;
+    printf("%20.8e %20.8e %20.8e %20.8e %20.8e %20.8e %20.8e\n", $r,$f,$fprime,$g,$gprime,$h,$hprime);
+  }else {
+    die "r is not the same for the two tabulated file.";}
+}
+

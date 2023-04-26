@@ -1,0 +1,56 @@
+#!/usr/bin/perl
+$type=$ARGV[0];shift;$pam=$ARGV[0];shift;$rcut=$ARGV[0];shift;$delr=$ARGV[0];shift;$disp=$ARGV[0];shift;
+
+@param=split(/,/,$pam);
+die "Two parameters are needed, but @param were passed to the scripts!" if uc($type) eq "POW" and @param != 2;
+die "Three parameters are needed, but @param were passed to the scripts!" if uc($type) eq "TTP" and @param != 3;
+$C6=$param[0];$nth=$param[1];
+$scal=1;
+$scal=$disp if $disp != 0;
+$nbins=int($rcut/$delr)+1;  
+
+for($i=0;$i<=$nbins;$i++)
+{
+    $r=$delr*$i;
+
+    #dispersion,pow
+   # if ($r==0.0) {$g=0.0;$gprime=0.0;}
+    if ($i<=10)  {$g=0.0;$gprime=0.0;}
+    else { 
+        $g=$C6*$r**$nth;
+        $gprime=-$nth*$C6*$r**($nth-1);
+    }
+    
+    #TT damp
+    if (uc($type) eq "TTP"){
+        $bij=$param[2];
+        $n=abs($nth);$k=1;
+        $Rtmp1=$bij*$r;
+        $Rtmp2=exp(-$Rtmp1);
+        for ($n=1;$n<=abs($nth);$n++){
+          $k=$k*$n;
+          $Rtmp2=$Rtmp2+exp(-$Rtmp1)*$Rtmp1**$n/$k;
+        }
+        $Rtmp3=$bij*exp(-$Rtmp1)*($Rtmp1)**abs($nth)/$k;
+        $gprime= (1-$Rtmp2)*$gprime-$Rtmp3*$g;
+        $g=(1-$Rtmp2)*$g;
+    }
+
+
+    #short range damping
+    if (uc($type) eq "SRD"){
+    if ($i<=1)  {$g=0.0;$gprime=0.0;}
+    else {
+        $R0ij=$param[2];
+        $Rtmp1=$r**abs($nth)+$R0ij**abs($nth);
+        $g=$C6/$Rtmp1;
+        $gprime=$C6/$Rtmp1**2*abs($nth)*$r**(abs($nth)-1);
+    }        
+    }
+
+    if ($nth == -6) {
+      printf("%20.8e %20.8e %20.8e %20.8e %20.8e %20.8e %20.8e\n", $r,0.0,0.0,$g*$scal,$gprime*$scal,0.0,0.0);
+    } else {
+      printf("%20.8e %20.8e %20.8e %20.8e %20.8e %20.8e %20.8e\n", $r,0.0,0.0,0.0,0.0,$g,$gprime);
+    }
+}

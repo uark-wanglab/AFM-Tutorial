@@ -1,0 +1,70 @@
+#!/usr/bin/perl
+# This routine mark within molecules of an atom with index $ido.
+if( $ARGV[0] eq '-h' || $ARGV[0] eq '-help')
+{
+help();
+exit;
+}
+sub help {
+  print "\nMark up molecules within ‘rcut’ of the atom num 'atom_index'. The mark value is mark_val.\n";
+  print "Usage: mark_within atom_index rcut mark_val [file.pxyz]\n\n";
+}
+
+
+$bnk="   ";
+
+$ido=$ARGV[0];shift;
+$rcu=$ARGV[0];shift;$rc2=$rcu*$rcu;
+$val=$ARGV[0];shift;
+$ido--;
+
+$natm=<>;chomp($natm);
+$_=<>;@pbc=split;
+($box1,$box2,$box3)=split;
+die "only orthorhombic box supported.\n" if @pbc>3;
+
+for ($i=0;$i<$natm;$i++)
+{
+$_=<>;
+($nam[$i],$xxx[$i],$yyy[$i],$zzz[$i],$mol[$i],$mar[$i])=split;
+}
+
+$xo=$xxx[$ido];$yo=$yyy[$ido];$zo=$zzz[$ido];
+print STDERR "origin location: $xo  $yo  $zo\n"."rcut is set to $rcu\n";
+
+$molname="crazy__";$markmol=0;
+for ($i=0;$i<$natm;$i++)
+{
+# start new molecule loop
+if ($molname ne $mol[$i]) { 
+
+if ($markmol ==1) { 
+for ($j=$molf;$j<$moll+1;$j++) {$mar[$j]=$val if $mar[$j]<$val;}
+}
+
+$molname = $mol[$i];$molf=$i;$markmol=0; 
+}
+# end new molecule loop 
+$moll=$i;
+
+$dx=abs($xxx[$i]-$xo); $dx=$box1-$dx if $dx>$box1/2;
+$dy=abs($yyy[$i]-$yo); $dy=$box2-$dy if $dy>$box2/2;
+$dz=abs($zzz[$i]-$zo); $dz=$box3-$dz if $dz>$box3/2;
+$dis2=$dx*$dx+$dy*$dy+$dz*$dz;
+
+if ($dis2<$rc2) {$markmol = 1;}
+}
+#end main for loop 
+if ($markmol ==1) { 
+for ($j=$molf;$j<$moll+1;$j++) {$mar[$j]=$val if $mar[$j]<$val;}
+}
+#need to mark the very last molecule
+
+#output starts here
+print $natm."\n";
+print $box1.$bnk.$box2.$bnk.$box3."\n";
+for ($i=0;$i<$natm;$i++)
+{
+print $nam[$i].$bnk.$xxx[$i].$bnk.$yyy[$i].$bnk.$zzz[$i].$bnk.$mol[$i].$bnk.$mar[$i]."\n";
+}
+

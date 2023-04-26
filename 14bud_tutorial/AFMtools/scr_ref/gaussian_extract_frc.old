@@ -1,0 +1,19 @@
+#!/usr/bin/perl
+while(<>)
+{
+if (/DE\/DX/) {
+$_=<>;
+$ind="Z";
+while($ind eq "Z"){
+for ($i=0;$i<3;$i++)
+{
+$_=<>; 
+($ind, $oX, $f[$i])=split;
+}
+$ind=substr($ind,0,1);
+print $f[0]."  ".$f[1]."   ".$f[2]."\n" if $ind eq "Z";
+}
+}
+}
+
+

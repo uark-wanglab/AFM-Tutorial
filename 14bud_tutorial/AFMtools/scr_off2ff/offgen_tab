@@ -1,0 +1,95 @@
+#!/usr/bin/perl
+$proto=$ARGV[0];shift;
+$inputoff=$ARGV[0];
+
+#get table parameters from .off file.
+@total=`offget_tabparam $inputoff`;
+
+#read protocols
+open (PRO,$proto);
+while (<PRO>) {
+if ( $_ =~ /^\s*$|#/) {next;}
+print "\nProtocol: ";print;
+($topgrid,$pattern)=split;
+
+#spacing
+@top=split(',',$topgrid);
+$cutoff=$top[0]; $delr=$top[1];
+$debug=1 if $top[0] =~ /deb/i;
+if ($debug==1) { $cutoff=$top[1]; $delr=$top[2] };
+#pattern
+if ($pattern =~ /pair/i) {
+  $pair=1;
+  $ind1=index($pattern,"pair"); 
+  $pat1=substr $pattern,$ind1;
+  @col=split /,|~|=/,$pat1;
+  $atm1=$col[1];$atm2=$col[2];
+} #generate potential for one pair
+if ($pattern =~ /prefix/i) {
+  $ind2=index($pattern,"prefix");#pre name for table file
+  $pat2=substr $pattern,$ind2;
+  @col=split /,|~|=/,$pat2;
+  $name=$col[1];
+} # prefix of the table files.
+
+#generate nonbonded tab
+for ($j=0;$j<@total;$j++) {
+  $gentab=0;$tab=0;
+  $str=$total[$j];
+  chomp($str); $str =~ s/^\s+|\s+$//g;
+  @temp=split /\s+/,$str;
+  $nam1=$temp[0];$nam2=$temp[1];
+
+  if ($pair ==1) { $gentab=1 if $nam1 eq  $atm1 and $nam2 eq  $atm2  or $nam1 eq  $atm2 and $nam2 eq $atm1;}
+  else { $gentab=1;}
+
+  if ($gentab) {
+    print "\nStart to generate table for: $nam1  $nam2  \n";
+
+    $tabname=$nam1."_".$nam2.".xvg"; $tabname=$name."_".$tabname if $name;
+
+    $nfunct=0;$funct=$temp[2]; $funct="COUplot" if $funct =~ /COU/i;
+    $pam=$temp[3];
+    $tab2="tmp.".$nam1."_".$nam2."_".$funct."_".$nfunct.".xvg";
+    $tmptab="tmp.".$nam1."_".$nam2.".xvg";
+    $tmptab1="tmp1.".$nam1."_".$nam2.".xvg";
+      for ($k=4;$k<@temp;$k++) {
+        if ($temp[$k] =~ /[a-zA-Z]/) {
+         # print "gen_nonbonded_table  $nam1  $nam2  $funct  $pam  $cutoff $delr $tab2 $disp \n";
+          system("gen_nonbonded_tab  $funct  $pam $cutoff $delr $tab2");
+          $funct=$temp[$k];$funct="COUplot" if $funct =~ /COU/i;
+          $pam=$temp[$k+1];$k++;   
+          $nfunct++;
+          if ( $nfunct >1 ) {
+            $cmd1="tabcombine $tmptab1 $tab2 > $tmptab";
+            $cmd2="cp $tmptab $tmptab1";
+            print $cmd1."\n"; system($cmd1);
+            print $cmd2."\n"; system($cmd2);              
+          } else { 
+            $tab1=$tab2; print "cp $tab2  $tmptab1\n"; system("cp $tab2  $tmptab1"); 
+          }
+          $tab2="tmp.".$nam1."_".$nam2."_".$funct."_".$nfunct.".xvg";
+        } else {$pam=$pam.",".$temp[$k];}
+
+        if ( $k == @temp-1) {
+         # print "gen_nonbonded_table  $nam1  $nam2  $funct  $pam  $cutoff $delr $tab2 $disp \n";
+          system("gen_nonbonded_tab $funct  $pam $cutoff $delr $tab2 $disp");
+          $tab=1;
+          $nfunct++;
+          if ( $nfunct >1 ) {
+            $cmd="tabcombine $tmptab1 $tab2 > $tabname";
+            print $cmd."\n"; system ($cmd);
+          } else {system ("mv $tab2 $tabname");}
+        } # the last potential
+      }
+    if ( $nfunct > 1) {
+    system ("rm tmp*.xvg") unless $debug;
+    system ("rm tmp1.*xvg") if $debug; }
+
+    print "No tabulated potentials are found for $nam1 ~ $nam2.\n" unless $tab==1;
+    print "End of generating table file for $nam1 ~ $nam2.\n" if $tab == 1;
+  } # end of generate  all the potentials 
+
+} # end of scan the table potentials from cryoff
+
+} #end of reading protocol

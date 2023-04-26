@@ -1,0 +1,2 @@
+AFMDIR=$(dirname $(readlink -f "$BASH_SOURCE"))
+export PATH=$AFMDIR/scr_QMMM_select:$AFMDIR/scr_QMMM_inp:$AFMDIR/scr_ref:$AFMDIR/scr_off2ff:$AFMDIR/scr_off2top:$AFMDIR/scr_tools:${PATH}

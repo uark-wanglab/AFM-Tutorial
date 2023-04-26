@@ -1,0 +1,31 @@
+#!/usr/bin/perl
+#This routine sort the atoms according mark.
+
+if( $ARGV[0] eq '-h' || $ARGV[0] eq '-help')
+{
+help();
+exit;
+}
+sub help {
+    print "\nSort the atoms according their mark value.\n";
+    print "Usage: pxyz_sort  [file.pxyz] \n\n";
+}
+
+
+$bnk="  ";
+$_=<>; print; chomp;$natm=$_;
+$_=<>; print;
+
+for ($i=0;$i<$natm;$i++)
+{
+$_=<>;
+($nam,$xxx,$yyy,$zzz,$mol,$val)=split;
+chomp($val);
+$key=$val*$natm+($nam-$i-1); 
+$hash{$key}=$_;
+}
+
+foreach my $name (sort { $b <=> $a} keys %hash) {
+print $hash{$name};
+}
+

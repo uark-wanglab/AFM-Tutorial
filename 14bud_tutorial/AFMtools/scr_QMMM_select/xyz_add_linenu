@@ -1,0 +1,26 @@
+#!/usr/bin/perl
+
+if( $ARGV[0] eq '-h' || $ARGV[0] eq '-help')
+{
+help();
+exit;
+}
+sub help {
+    print "\nAdd the header lines for a headless xyz or pxyz file.\n";
+    print "Usage: xyz_add_linenu  [file.xyz] \n\n";
+}
+
+$i=0;
+
+while(<>)
+{
+
+$i++;
+$buf.=$_;
+
+}
+
+print $i."\n";
+print "comment\n";
+print $buf;
+

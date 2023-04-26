@@ -1,0 +1,50 @@
+#!/usr/bin/perl
+$offpam=$ARGV[0];shift;$toppam=$ARGV[0];shift;$pattern=$ARGV[0];shift;
+$inputoff=$ARGV[0];shift;$inptop = $ARGV[0];shift;$outtop = $ARGV[0];shift;
+$tmpfile = "/tmp/temptop.$$"; $tmpfil2 = "/tmp/temptop2.$$";
+system ("cp $inptop $tmpfile");
+die "script will not overwrite existing output\n" if (-e $outtop);
+
+#get table potentials
+@off=split(/,/,$offpam);
+@total=`offget_tabparam $inputoff @off `;
+#print "@total";
+
+#define atom types
+if ($pattern =~ /type/i) {
+  $ind1=index($pattern,"type");
+  $typecov=1;
+  $pat1=substr $pattern,$ind1; $pat1 =~ s/,|=/ /g; @file=split /\s+/,$pat1;
+  open (PATF,$file[1]);
+  while(<PATF>) { chomp;($typ1,$typ2)=split;$typ{$typ2}=$typ1;}
+  print "Atom types are defined from [ $file[1] ] file.\n";
+} else { print "Atom types are defined from [ $inputoff ] file.\n" }
+
+#function position and type
+@top=split(',',$toppam);
+$section=$top[0]; $funct="1,1.0,1.0"; #default function.
+$funct="" if @top > 1;
+for ($n=1;$n<@top;$n++) { $funct=$funct.",".$top[$n]; }
+
+#update nonbonded list
+for($i=0;$i<@total;$i++){
+  $str=$total[$i];
+  chomp($str); $str =~ s/^\s+|\s+$//g;
+  #@temp=split $str;
+  #print $str."\n";
+  @temp=split /\s+/,$str;
+  print $temp[0]."  ".$temp[1]."\n";
+  $list=1;
+  if ($str =~ /COU/ and @temp == 4) {
+     $list=0; }
+    # print "Pairwise interaction $atm1~$atm2 is not added since only coulombic interaction is founded!\n";}
+  if ($list) {
+    $atm1=$temp[0]; $atm1=$typ{$atm1} if $typecov == 1;
+    $atm2=$temp[1]; $atm2=$typ{$atm2} if $typecov == 1;
+    $pamlist=$atm1.",".$atm2.",".$funct;
+    system("topadd_list_paramfile $section  $pamlist $tmpfile  > $tmpfil2; mv $tmpfil2 $tmpfile") ;
+    $idx++;
+  }
+}
+print "Add [$idx] terms to [$section].\n";
+system (" mv $tmpfile $outtop")

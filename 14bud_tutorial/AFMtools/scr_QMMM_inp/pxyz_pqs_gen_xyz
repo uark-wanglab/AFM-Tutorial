@@ -1,0 +1,36 @@
+#!/usr/bin/perl
+#This routine generate xyz file for pqs. The unit is atomic unit.
+#A special character is added after atom name according the name translation file.
+
+if( $ARGV[0] eq '-h' || $ARGV[0] eq '-help')
+{
+help();
+exit;
+}
+sub help {
+  print "\nGenerate the pqs xyz file from a pxyz or xyz file.\n";
+  print "Please find an example name_translation file in the manual or translation_file directory.\n";
+  print "Usage: pxyz_pqs_gen_xyz  name_translation  [file.pxyz] \n\n";
+}
+
+
+$nametrans=$ARGV[0];shift; #This is name translation file
+die "ERROR: NameTranslation file: $nametrans expected!\n" unless -e $nametrans;
+
+open (nameinfo,"<", $nametrans); 
+while (<nameinfo>){
+chomp;
+if ((substr $_, 0, 1) eq "#") {next;}
+($name,$QMnam)=split;
+$trans{$name} = $QMnam if $QMnam;
+}
+
+$_=<>;$_=<>;
+
+while(<>)
+{
+chomp;($nam,$xxx,$yyy,$zzz)=split;
+$nam=$trans{$nam} if $trans{$nam};
+printf ("%10s %15.5f %15.5f %15.5f\n", $nam,$xxx,$yyy,$zzz)
+}
+

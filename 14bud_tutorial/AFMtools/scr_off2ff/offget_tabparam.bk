@@ -1,0 +1,54 @@
+#!/usr/bin/perl
+
+$bnk="  ";
+ 
+$filename=$ARGV[0];shift; 
+open (FIL,$filename) || die "can not open file $filename"."\n";
+
+while(<FIL>)
+{
+if (/Table-Potential/) {
+  $npot=0;
+  while(<FIL>) {
+    chomp; $tmp=$_;
+    push @pot, "$tmp";
+    $npot++;
+  }
+}
+}
+
+for ($j=0;$j<$npot;$j++){
+   $str=$pot[$j];
+   chomp($str);
+   $str =~ s/^\s+|\s+$//g;
+   $str =~ s/\~|:/ /g;
+   @ipot=split /\s+/,$str;
+   $atm1=$ipot[0];$atm2=$ipot[1];
+   $list=1;
+   for ($i=0;$i<@ARGV;$i++) {
+     if ($list) {
+       $exclusion=$ARGV[$i];
+       @excl=split(/~|:/,$exclusion);
+       if ( @excl == 1 ) { $list=0 if $atm1 eq $excl[0] or $atm2 eq $excl[0];}
+       if ( @excl == 2 ) { $list=0 if ($atm1 eq $excl[0] or $atm1 eq $excl[1]) and ($atm2 eq $excl[0] or $atm2 eq $excl[1]);}
+     }
+   }
+
+   if ($list) {
+     $atm1=sprintf("%-5s",$ipot[0]);$atm2=sprintf("%-5s",$ipot[1]);$type=substr($ipot[2],0,3);
+     $param=$atm1."    ".$atm2;
+     for ($i=2;$i<@ipot;$i++) {
+       if ($ipot[$i] =~ /[a-zA-Z]/ and $ipot[$i] =~ /[0-9]/ ) {
+         $ipot[$i] =~ /[^A-Z]/;
+         $type=$`;
+         $val=substr $ipot[$i],length($type);
+         $val=sprintf("%12.3f",$val);
+         $param=$param."   ".$type."   ".$val;
+       } else { 
+         $paramtemp=sprintf("%12.3f",$ipot[$i]);
+         $paramtemp=$ipot[$i] if $ipot[$i] =~ /[a-zA-Z]/;
+         $param=$param."    ".$paramtemp;}
+     }
+   print $param."\n";
+   }
+}

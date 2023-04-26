@@ -1,0 +1,50 @@
+#!/usr/bin/perl
+# This routine update the charges in the *xyz section of the orca input file
+$bnk="  ";$frz="\$";  # disable freeze by defining $frz="";
+if( $ARGV[0] eq '-h' || $ARGV[0] eq '-help')
+{
+help();
+exit;
+}
+sub help {
+    print "\n Update the MM charges portion of an ORCA xyz file from a pxyz or xyz file.\n";
+    print "Please find an example chginfo file in the manual or translation_file directory.\n";
+    print "Usage: pxyz_orca_upd_chg MyMol.templ.inp chginfo [file.pxyz] \n\n";
+}
+
+$templ=$ARGV[0]; shift; # This is the template file
+$chginfo=$ARGV[0];shift; # This is the nam translation file
+
+die "ERROR: Charge Info file: $chginfo expected!\n" unless -e $chginfo;
+die "ERROR: Template file: $templ expected!\n" unless -e $templ;
+
+open (chginfo,"<", $chginfo); # Open chginfo file. Misnamed right now, [ ] fix later
+while (<chginfo>) {
+chomp;
+if ((substr $_, 0, 1) eq "#") {next;} # Skip comment lines in naminfo file
+($nam, $charge)=split;
+$chg{$nam} = $charge if $charge; # Translate the desired charged sites to have the name Q, which is used for charges in ORCA
+}
+
+open (orca, "<", $templ); # Open the ORCA template file. My method is to redirect the output from the gen_xyz to a "header" file, and use that as the input.templ file for this script
+$_=<orca>;
+do {print;$_=<orca>;} until (/\*\s*xyz/); # * is keyword for beginning of xyz portion of MyMol.inp file
+do {print; $_=<orca>; } until (/\s*Q\s+/);
+
+do  {$_=<orca>; } until (/\s*\*/);
+$buf=$_;
+
+while (<>)
+{
+chomp; $natms = $_;
+$_ = <>;
+for($i=0;$i<$natms;$i++){
+    $_=<>; chomp; ($nam, $xxx, $yyy, $zzz, $mol, $mar)=split;
+    $tmpchg=$chg{$nam};
+    die "ERROR: No charge found for $nam, Please check $chginfo file!" unless exists($chg{$nam});
+    print $bnk."Q".$bnk.$chg{$nam}.$bnk.$xxx.$frz.$bnk.$yyy.$frz.$bnk.$zzz.$frz."\n";}
+}
+print $buf;
+
+print while (<orca>);
+

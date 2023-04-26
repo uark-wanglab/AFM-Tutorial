@@ -1,0 +1,58 @@
+#!/usr/bin/perl
+$offpam=$ARGV[0];shift;$toppam=$ARGV[0];shift;$pattern=$ARGV[0];shift;
+$inputoff=$ARGV[0];shift;$inptop = $ARGV[0];shift;$outtop = $ARGV[0];shift;
+$tmpfile = "/tmp/temptop.$$"; $tmpfil2 = "/tmp/temptop2.$$";
+system ("cp $inptop $tmpfile");
+die "script will not overwrite existing output\n" if (-e $outtop);
+
+#get bond angle dihedral potentials
+@off=split(/,/,$offpam);
+@total=`offget_intra $inputoff @off `;
+#print "@total";
+
+#define atom types
+if ($pattern =~ /type/i) {
+  $ind1=index($pattern,"type");
+  $typecov=1;
+  $pat1=substr $pattern,$ind1; $pat1 =~ s/,|=/ /g; @file=split /\s+/,$pat1;
+  open (PATF,$file[1]);
+  while(<PATF>) { chomp;($typ1,$typ2)=split;$typ{$typ2}=$typ1;}
+  print "Atom types are defined from [ $file[1] ] file.\n";
+} else { print "Atom types are defined from [ $inputoff ] file.\n" }
+
+#select one interaction type
+if ($pattern =~ /intkey/i) {
+  $ind2=index($pattern,"intkey");
+  $intkey=1;
+  $pat2=substr $pattern,$ind2; $pat2 =~ s/,|=/ /g; @temp=split /\s+/,$pat2;
+  $key=$temp[1];
+}
+
+#function position and type
+@top=split(',',$toppam);
+$section=$top[0]; $funct="1"; #default function.
+$funct=$top[1] if @top > 1;
+for ($n=2;$n<@top;$n++) { $funct=$funct.",".$top[$n]; }
+
+#update nonbonded list
+for($i=1;$i<@total;$i++) {
+  $list=0;$pamlist="";
+  $str=$total[$i]; chomp($str); $str =~ s/^\s+|\s+$//g; @temp=split /\s+/,$str;
+  @atmpair=split /\_/,$temp[1];
+  if ($section =~ /bond/i) { $list=1 if @atmpair==2;}
+  if ($section =~ /ang/i) { $list=1 if @atmpair==3;}
+  if ($section =~ /dih/i) { $list=1 if @atmpair==4;}
+  if ($intkey and $list ) { $list=0 unless $temp[2] eq uc($key) ;}
+  if ($list) {
+    $atm1=$atmpair[0]; $atm1=$typ{$atm1} if $typecov == 1;
+    $atm2=$atmpair[1]; $atm2=$typ{$atm2} if $typecov == 1;
+    $atm3=$atmpair[2]; $atm3=$typ{$atm3} if $typecov == 1;
+    $atm4=$atmpair[3]; $atm4=$typ{$atm4} if $typecov == 1;
+    $pamlist=$temp[1].",".$funct;
+    for ($j=3;$j<@temp;$j++) { $pamlist=$pamlist.",".$temp[$j];}
+    system("topadd_list_paramfile $section $pamlist $tmpfile  > $tmpfil2; mv $tmpfil2 $tmpfile") ;
+    $idx++;
+  }
+}
+print "Add [$idx] terms to [$section].\n";
+system (" mv $tmpfile $outtop")

@@ -1,0 +1,98 @@
+#!/usr/bin/perl
+if( $ARGV[0] eq '-h' || $ARGV[0] eq '-help')
+{
+help();
+exit;
+}
+sub help {
+  print "\nUpdate a template top/itp file from an off file.\n";
+  print "Please refer to the manual about the format of the protocol file.
+Examples can be found in the protocol directory.\n";
+  print "Usage: off2top  protocol  off template_top  final_top  \n\n";
+}
+
+$protfile=$ARGV[0];$inputoff=$ARGV[1];$inptop = $ARGV[2]; $outtop = $ARGV[3];
+$tmpfile = "/tmp/tempoff2top.$$"; $tmpfil2 = "/tmp/tempoff2top2.$$";
+system ("cp $inptop $tmpfile");
+die "no $tmpfile \n" unless ( -e $tmpfile);
+die "script will not overwrite existing output\n" if (-e $outtop);
+open(PRO,$protfile);
+while(<PRO>)
+{
+if ( $_ =~ /^\s*$|#/) {next;}
+print "\nProtocol: ";print;
+($what)=split;
+
+#nonbonded list in parameter files
+if ($what =~ /list.nonbond/i) {
+  ($what,$offpam,$toppam,$pattern)=split;
+  print "Update nonbonded list for parameter file $intop :\n";
+  system("off2top_nonbonded_list  $offpam  $toppam  $pattern  $inputoff $tmpfile $tmpfil2 ; mv $tmpfil2 $tmpfile");}
+
+#bonded list in parameter files
+elsif ($what =~ /list.bonded/i) {
+  ($what,$offpam,$toppam,$pattern)=split;
+  print "Update bonded list for parameter file $intop :\n";
+  system("off2top_bonded_list  $offpam  $toppam  $pattern  $inputoff $tmpfile $tmpfil2 ; mv $tmpfil2 $tmpfile");}
+
+#bonded and nonbonded parameters in parameter files
+elsif ($what =~ /pam.charge/i) {
+  ($what,$offpam,$toppam,$unitcov,$pattern)=split;
+  print "Update charges for parmeter file $intop:\n";
+  system("off2top_nonbonded_charge  $offpam  $toppam  $unitcov $pattern  $inputoff $tmpfile $tmpfil2 ; mv $tmpfil2 $tmpfile");}
+
+elsif ($what =~ /pam.nonbond/i) {
+  ($what,$offpam,$toppam,$unitcov,$pattern)=split;
+  print "Update nonbonded parameters for parameter file $intop :\n";
+  system("off2top_nonbonded_param  $offpam  $toppam  $unitcov $pattern $inputoff $tmpfile $tmpfil2 ; mv $tmpfil2 $tmpfile")}
+
+elsif($what =~ /pam.bonded/i) {
+  ($what,$offpam,$toppam,$unitcov,$pattern)=split;
+  print "Update bond parameters for parmeter file $intop :\n";
+  system("off2top_bonded_param $offpam  $toppam $unitcov $pattern $inputoff $tmpfile $tmpfil2 ; mv $tmpfil2 $tmpfile"); }
+
+#elsif ($what =~ /pam.angle/i) {
+#  ($what,$offpam,$toppam,$unitcov,$pattern)=split;
+#  print "Update angle parameters for parmeter file $intop :\n";
+#  system("off2top_bonded_param  $offpam  $toppam  $unitcov $pattern  $inputoff $tmpfile $tmpfil2 ; mv $tmpfil2 $tmpfile");}
+#
+#elsif ($what =~ /pam.dih/i) {
+#  ($what,$offpam,$toppam,$unitcov,$pattern)=split;
+#  print "Update dihedral parameters for parmeter file $intop :\n";
+#  system("off2top_bonded_param  $offpam  $toppam  $unitcov $pattern  $inputoff $tmpfile $tmpfil2 ; mv $tmpfil2 $tmpfile");}
+
+#bonded parameters in molecule definition
+
+elsif ($what =~ /mol.charge/i) {
+  ($what,$offpam,$toppam,$unitcov,$pattern)=split;
+  $pattern="default" if (!$pattern);
+  print "Update parameters for molecule definition file $intop :\n";
+  system("off2top_molecule_charge  $offpam  $toppam  $unitcov $pattern  $inputoff $tmpfile $tmpfil2 ; mv $tmpfil2 $tmpfile");}
+
+elsif ($what =~ /mol.bonded/i) {
+  ($what,$offpam,$toppam,$unitcov,$pattern)=split;
+  print "Update parameters for molecule definition file $intop :\n";
+  system("off2top_molecule_param  $offpam  $toppam $unitcov $pattern  $inputoff $tmpfile $tmpfil2 ; mv $tmpfil2 $tmpfile");}
+
+elsif ($what =~ /mol.def/i) {
+  ($what,$offpam,$toppam,$unitcov,$pattern)=split;
+  print "Update parameters for molecule definition file $intop :\n";
+  system("off2top_molecule_define  $offpam  $toppam $unitcov $pattern  $inputoff $tmpfile $tmpfil2 ; mv $tmpfil2 $tmpfile");}
+
+#elsif ($what =~ /mol.angle/i) {
+#  ($what,$offpam,$toppam,$unitcov,$pattern)=split;
+#  print "Update parameters for molecule definition file $intop:\n";
+#  system("off2top_molecule_param  $offpam  $toppam $unitcov $pattern $inputoff $tmpfile $tmpfil2 ; mv $tmpfil2 $tmpfile");}
+#
+#elsif ($what =~ /mol.dih/i) {
+#  ($what,$offpam,$toppam,$unitcov,$pattern)=split;
+#  print "Update parameters for molecule definition file $intop :\n";
+#  system("off2top_molecule_param  $offpam  $toppam  $unitcov $pattern  $inputoff $tmpfile $tmpfil2 ; mv $tmpfil2 $tmpfile");}
+
+else { 
+  die  "No rules for this type: $what.\n";
+}
+
+} #end while
+
+system ("mv $tmpfile $outtop") if uc(substr $what,0,3) ne "TAB";

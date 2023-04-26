@@ -1,0 +1,53 @@
+#!/usr/bin/perl
+if( $ARGV[0] eq '-h' || $ARGV[0] eq '-help')
+{
+help();
+exit;
+}
+sub help {
+  print "\nAdd the M site for the BLYPSP-4F/WAIL water.\n";
+  print "The order of the three atoms should be OW HW HW.\n";
+  print "Usage: xyz_add_msite OW_name HW_name HW_name M_name [file.xyz] \n\n";
+}
+
+
+$atm1=$ARGV[0];shift;
+$atm2=$ARGV[0];shift;
+$atm3=$ARGV[0];shift;
+$msite=$ARGV[0];shift;
+
+$ratio=0.20;
+$ratio2=1.0-2.0*$ratio;
+
+while(<>)
+{
+
+print;
+($name,$xxx,$yyy,$zzz)=split;
+
+if ($name eq $atm1) {
+$xxo=$xxx;$yyo=$yyy;$zzo=$zzz;
+
+$_=<>; print;
+($name,$xxx,$yyy,$zzz)=split;
+#die "expect $atm2\n" unless $name eq $atm2;
+next unless $name eq $atm2;
+$xh1=$xxx;$yh1=$yyy;$zh1=$zzz;
+
+$_=<>; print;
+($name,$xxx,$yyy,$zzz)=split;
+#die "expect $atm3\n" unless $name eq $atm3;
+next unless $name eq $atm3;
+$xh2=$xxx;$yh2=$yyy;$zh2=$zzz;
+
+$xxm=$xxo*$ratio2+($xh1+$xh2)*$ratio;
+$yym=$yyo*$ratio2+($yh1+$yh2)*$ratio;
+$zzm=$zzo*$ratio2+($zh1+$zh2)*$ratio;
+
+printf "$msite    %12.7f%12.7f%12.7f\n", $xxm,$yym,$zzm;
+}
+
+}
+
+
+

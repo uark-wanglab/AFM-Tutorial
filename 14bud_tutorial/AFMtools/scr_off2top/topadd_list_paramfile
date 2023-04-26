@@ -1,0 +1,41 @@
+#!/usr/bin/perl
+$bnk="      ";
+$section=$ARGV[0];shift;
+$funct=$ARGV[0];shift;
+$topfile=$ARGV[0];
+
+$funct =~ s/,|_/      /g;
+$pamlist=$funct;
+@atoms=split /\s+/,$funct;
+$nam1=uc($atoms[0]);
+$nam2=uc($atoms[1]);
+
+open (TOP,$topfile);
+while(<TOP>)
+{
+  $_ =~ s/^\s+//g;
+  if ((substr $_, 0, 1) eq ";") {print; next; }
+  if (/$section/i) {
+    print;
+    while (<TOP>) {
+      $_ =~ s/^\s+//g;
+      if ((substr $_, 0, 1) eq ";") {print;next;}
+      if ($update == 0) {
+        print $pamlist."\n";
+        $update=1;
+      }
+      if ( $_ =~ /^\s*$|\[/) {print;last}
+      print $_;
+      if ($update==1 and $section =~ /nonbond/i) {
+        chomp;
+        ($name1,$name2)=split;
+        if ($nam1 eq uc($name1) and $nam2 eq uc($name2) or $nam1 eq uc($name2) and $nam2 eq uc($name1)){
+
+          warn "Another nonbonded defination is founeded for $nam1 ~ $nam2, pleace check the template file.\n";
+        } 
+      }
+    }
+  } else { print; }
+} #end  loop
+
+die "No [$section] is found in [$topfile]!" unless $update==1;

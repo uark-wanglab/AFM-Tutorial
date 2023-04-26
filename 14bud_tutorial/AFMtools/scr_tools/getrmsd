@@ -1,0 +1,51 @@
+#!/usr/bin/perl
+open(FIL1,"$ARGV[0]") || die "can not open $ARGV[0]\n";
+open(FIL2,"$ARGV[1]") || die "can not open $ARGV[1]\n";
+
+$_=<FIL1>;
+chomp;
+@fld1=split;
+die "a minimum of 3 column expected.\n" if (@fld1<3);
+$xin=1;
+$xin=@fld1-3 if @fld1 < 5;
+$xin=4 if @fld1 > 6;
+
+$_=<FIL2>;
+chomp;
+@fld2=split;
+die "two files must have the same number of columns\n" unless (@fld1 == @fld2);
+
+$yin=$xin+1; $zin=$xin+2;
+
+$fx1=$fld1[$xin]; $fy1=$fld1[$yin]; $fz1=$fld1[$zin];
+$fx2=$fld2[$xin]; $fy2=$fld2[$yin]; $fz2=$fld2[$zin];
+$sqfx=($fx1-$fx2)*($fx1-$fx2); 
+$sqfy=($fy1-$fy2)*($fy1-$fy2);     
+$sqfz=($fz1-$fz2)*($fz1-$fz2);
+$nda=1;
+$maxe=$sqfx+$sqfy+$sqfz; $maxen=$nda;
+
+print "x force component in each files are : $fx1, $fx2\n";
+#print "$sqfx $sqfy $sqfz\n";
+
+while(<FIL1>)
+{
+chomp; @fld1=split;
+$_=<FIL2>; chomp; @fld2=split;
+$fx1=$fld1[$xin]; $fy1=$fld1[$yin]; $fz1=$fld1[$zin];
+$fx2=$fld2[$xin]; $fy2=$fld2[$yin]; $fz2=$fld2[$zin];
+
+$tx=($fx1-$fx2)*($fx1-$fx2); $sqfx+=$tx;
+$ty=($fy1-$fy2)*($fy1-$fy2); $sqfy+=$ty;
+$tz=($fz1-$fz2)*($fz1-$fz2); $sqfz+=$tz;
+$nda++;
+$temp=$tx+$ty+$tz;
+if ($temp > $maxe) {$maxe=$temp; $maxen=$nda};
+#print "$sqfx $sqfy $sqfz\n";
+
+}
+
+$rmsd=sqrt(($sqfx+$sqfy+$sqfz)/$nda);
+print "$nda RMSD: $rmsd\n";
+print "record with the largest deviation happened at record $maxen. The absolute difference is ".sqrt($maxe)."\n";
+

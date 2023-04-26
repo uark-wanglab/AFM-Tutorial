@@ -1,0 +1,47 @@
+#!/usr/bin/perl
+# In GAMESS the partial charges are supplied as part of the EFP fragment 
+# This script handles this fragment section to provide location of partial charges.
+# GAMESS limit the size of each fragment. This script will only work if all charges fit within one fragment.
+ 
+$templ=$ARGV[0];shift; #Gamess template file.
+$chginfo=$ARGV[0];shift; # partical charge information.
+
+die "ERROR: GAMESS template file: $templ expected!\n" unless -e $templ;
+die "ERROR: Partical charge file: $chginfo expected!\n" unless -e $chginfo;
+
+$bnk='   '; $bor=1.8897259885789233;
+
+open (charge,"<", $chginfo);
+while (<charge>){
+chomp;
+if ((substr $_, 0, 1) eq "#") {next;}
+($name,$chgval)=split;
+$chg{$name} = $chgval;
+}
+
+open (gms,"<",$templ);
+do {$_=<gms>; print;} until (/\$EFRAG/);
+$_=<gms>; print;$_=<gms>; print; chomp;
+($foo,$fragname)=split("=");
+
+$frag="\n \$"."$fragname\n";
+$frag=$frag."  Fragment Definition.\n";
+$frag=$frag."  COORDINATES (BOHR)\n";
+$monopoles=' MONOPOLES'."\n";
+
+$_=<>;chomp;$natms=$_; #start pxyz file
+$_=<>;$pbc=$_;
+for ($i=0;$i<$natms;$i++)
+{
+$_=<>;chomp; ($nam, $xxx, $yyy, $zzz,$mol,$mar)=split;
+die "ERROR: No partial charge found for $nam, Please check $chginfo file!" unless exists($chg{$nam});
+$efrag=$efrag.$bnk.$nam."M".$i.$bnk.$xxx.$bnk.$yyy.$bnk.$zzz."\n";
+$frag=$frag.$bnk.$nam."M".$i.$bnk.$xxx*$bor.$bnk.$yyy*$bor.$bnk.$zzz*$bor.$bnk."0$bnk"."0\n";
+$monopoles=$monopoles.$bnk.$nam."M".$i.$bnk.$chg{$nam}."\n";
+}
+
+$efrag=$efrag." \$END\n";
+$frag=$frag.$bnk."STOP\n";
+$monopoles=$monopoles.$bnk.'STOP'."\n".' $END';
+
+print $efrag; print $frag; print $monopoles;
